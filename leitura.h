@@ -20,6 +20,8 @@ typedef struct
     vector<string> codigo_clientes;
     vector<string> nome_produtos;
     map<string,int> codigo;
+    vector<int> codigo_produtos;
+    map<int,int> codigo_prod;
 
 }listaCompras;
 

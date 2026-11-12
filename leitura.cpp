@@ -95,7 +95,17 @@ int leitura(int argc, char *argv[]) {
             indice++;
         }
     }
-    
+    int qtd_repetido_produto = 0;
+
+    for (int i = 0; i < records; i++) {
+    int cod = dados[i].cod_produto;
+
+    if (lista.codigo_prod.find(cod) == lista.codigo_prod.end()) {   // produto ainda não está no map
+        lista.codigo_prod[cod] = qtd_repetido_produto;           // ID = próximo número livre
+        lista.codigo_produtos.push_back(cod);
+        qtd_repetido_produto++;
+    }
+}
 
     // Exibe os produtos únicos filtrados
     /* for(int i = 0; i < qtd_repetido_cliente; i++){
@@ -105,11 +115,13 @@ int leitura(int argc, char *argv[]) {
         cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
     }
  */
-    for (int i = 0; i < qtd_repetido_cliente; i++){
+    /* for (int i = 0; i < qtd_repetido_cliente; i++){
         cout << lista.codigo_clientes[i]<< "->" << i << "\n" << i;  
-   } 
+   } */ 
         
-    
+    for (auto &par : lista.codigo_prod) {
+    cout << par.first << " -> " << par.second << "\n";   // código -> ID
+    }
     printf("\nTotal de registros validos lidos: %d\n", records);
     printf("Total de linhas invalidas: %d\n", lixo);
     printf("Total de produtos unicos: %d\n", qtd_repetido_nome);

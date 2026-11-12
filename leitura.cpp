@@ -28,13 +28,12 @@ int leitura(int argc, char *argv[]) {
         return 1;
     }
     Dados dados[1600];
-    vector<string> codigo_clientes;
-    vector<string> nome_produtos;
+    listaCompras lista;
 
     int records = 0;    
     int lixo = 0;
-    int qtd_repetido_nome = 0;
     int qtd_repetido_cliente = 0;
+    int qtd_repetido_nome = 0;
     // Descarta o cabeçalho inicial
     fscanf(file, "%*[^\n]");
 
@@ -61,35 +60,36 @@ int leitura(int argc, char *argv[]) {
 
     fclose(file);
     //Filtrar os clientes
+    
     sort(dados, dados + records, comparaPorCliente);
-    for(int i = 0; i < records; i++){
-        if(i > 0 && string(dados[i].cod_cliente) == string(dados[i - 1].cod_cliente)){
+    for (int i = 0; i < records; i++) {
+        if (i > 0 && string(dados[i].cod_cliente) == string(dados[i - 1].cod_cliente)) {
             continue;
-        } else {
-            codigo_clientes.push_back(dados[i].cod_cliente);
+        }else{
+            lista.codigo_clientes.push_back(dados[i].cod_cliente);
             qtd_repetido_cliente++;
         }
+        
     }
 
-    //Filtra o nome dos produtos
+    // Filtrar o nome dos produtos
     sort(dados, dados + records, comparaPorNome);
-    
-    for(int i = 0; i < records; i++){
-        
+    for (int i = 0; i < records; i++) {
         if (i > 0 && string(dados[i].nome_produto) == string(dados[i - 1].nome_produto)) {
-            continue; 
-        } else {
-            nome_produtos.push_back(dados[i].nome_produto);
+            continue;
+        }else{
+            lista.nome_produtos.push_back(dados[i].nome_produto);
             qtd_repetido_nome++;
         }
+       
     }
     
     // Exibe os produtos únicos filtrados
     for(int i = 0; i < qtd_repetido_cliente; i++){
-        cout << "[" << i+1 << "] elemento: " << codigo_clientes[i] << "\n";
+        cout << "[" << i+1 << "] elemento: " << lista.codigo_clientes[i] << "\n";
     }
     for(int i = 0; i < qtd_repetido_nome; i++){
-        cout << "[" << i+1 << "] elemento: " << nome_produtos[i] << "\n";
+        cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
     }
 
     printf("\nTotal de registros validos lidos: %d\n", records);

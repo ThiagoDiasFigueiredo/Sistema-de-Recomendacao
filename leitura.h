@@ -1,7 +1,9 @@
 #ifndef LEITURA_H
 #define LEITURA_H
-
+#define REGISTROS 1600
 #include <iostream>
+#include <vector>
+#include<map>
 using namespace std;
 
 typedef struct 
@@ -12,6 +14,12 @@ typedef struct
     char nome_produto[200];
 
 }Dados;
+
+typedef struct 
+{
+    vector<string> codigo_clientes;
+    vector<string> nome_produtos;
+}listaCompras;
 
 
 int leitura(int argc, char *argv[]);

@@ -34,6 +34,7 @@ int leitura(int argc, char *argv[]) {
     int lixo = 0;
     int qtd_repetido_cliente = 0;
     int qtd_repetido_nome = 0;
+    
     // Descarta o cabeçalho inicial
     fscanf(file, "%*[^\n]");
 
@@ -67,7 +68,7 @@ int leitura(int argc, char *argv[]) {
             continue;
         }else{
             lista.codigo_clientes.push_back(dados[i].cod_cliente);
-            qtd_repetido_cliente++;
+            qtd_repetido_cliente++; 
         }
         
     }
@@ -79,19 +80,36 @@ int leitura(int argc, char *argv[]) {
             continue;
         }else{
             lista.nome_produtos.push_back(dados[i].nome_produto);
+            
             qtd_repetido_nome++;
         }
        
     }
+    //Construindo o map dos codigos dos clientes
+    int indice = 0;
+    for(int i = 0; i < records; i++){
+        string cod = dados[i].cod_cliente;
+        if(lista.codigo.find(cod) == lista.codigo.end()){ //Cliente não está no map
+            lista.codigo[cod] = indice;
+            lista.codigo_clientes.push_back(cod);
+            indice++;
+        }
+    }
     
+
     // Exibe os produtos únicos filtrados
-    for(int i = 0; i < qtd_repetido_cliente; i++){
+    /* for(int i = 0; i < qtd_repetido_cliente; i++){
         cout << "[" << i+1 << "] elemento: " << lista.codigo_clientes[i] << "\n";
     }
     for(int i = 0; i < qtd_repetido_nome; i++){
         cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
     }
-
+ */
+    for (int i = 0; i < qtd_repetido_cliente; i++){
+        cout << lista.codigo_clientes[i]<< "->" << i << "\n" << i;  
+   } 
+        
+    
     printf("\nTotal de registros validos lidos: %d\n", records);
     printf("Total de linhas invalidas: %d\n", lixo);
     printf("Total de produtos unicos: %d\n", qtd_repetido_nome);

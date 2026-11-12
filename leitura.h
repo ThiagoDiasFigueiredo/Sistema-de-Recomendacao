@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include<map>
+#include <set>
+
 using namespace std;
 
 typedef struct 
@@ -22,7 +24,7 @@ typedef struct
     map<string,int> codigo;
     vector<int> codigo_produtos;
     map<int,int> codigo_prod;
-
+    vector<set<int>> compras;
 }listaCompras;
 
 

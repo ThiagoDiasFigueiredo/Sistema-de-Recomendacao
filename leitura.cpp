@@ -101,7 +101,7 @@ int leitura(int argc, char *argv[]) {
         }
     }
     //Construindo o map dos produtos
-    int qtd_repetido_produto = 0;
+    int qtd_repetido_produto = 1;
 
     for (int i = 0; i < total; i++) {
     int cod = dados[i].produto;
@@ -132,34 +132,35 @@ int leitura(int argc, char *argv[]) {
     //Atividade 1.1
     /* for(int i = 0; i < qtd_cliente_unico; i++){
         cout << "[" << i+1 << "] elemento: " << lista.codigo_clientes[i] << "\n";
-    } */  
+    } */   
    
     //atividade 1.2
-      /* for (int i = 0; i < qtd_cliente_unico; i++){
+    /* for (int i = 0; i < qtd_cliente_unico; i++){
         cout << lista.codigo_clientes[i]<< "->" << i << "\n";  
-    } */ 
+    } */  
 
     //Atividade 1.3
-     /* for(int i = 0; i < qtd_repetido_nome; i++){
+    
+    /* for(int i = 0; i < qtd_repetido_nome; i++){
         cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
-    } */ 
+    } */  
  
     
     //Atividade 1.4
-    /*  for (auto &p : lista.codigo_prod) { //exibe em ordem crescente as chaves
+      for (auto &p : lista.codigo_prod) { //exibe em ordem crescente as chaves
     cout << p.first << " -> " << p.second << "\n";   // código -> ID
-    } */   
+    }    
 
     //atividade 1.5
     
-     for (int c = 0; c < qtd_clientes; c++) {
+     /* for (int c = 0; c < qtd_clientes; c++) {
         cout << lista.clientes[c] << " comprou:";
         int tam = lista.compras[c].size();
         for (int j = 0; j < tam; j++) {
             cout << " " << lista.compras[c][j];
         }
         cout << "\n";
-    } 
+    } */ 
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

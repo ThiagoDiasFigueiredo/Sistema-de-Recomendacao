@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <cstdio>
+#include <string>
 using namespace std;
 
 // Função para ordenar os structs pelo nome do produto
@@ -111,8 +113,8 @@ int leitura(int argc, char *argv[]) {
         }
     }
     //Monta o vector compra
-                    
-    int qtd_clientes;
+    sort(dados, dados + total, comparaPorCliente); 
+    int qtd_clientes = -1;
     for (int i = 0; i < total; i++) {
 
         // cliente novo: primeiro registro ou código diferente do anterior
@@ -150,14 +152,14 @@ int leitura(int argc, char *argv[]) {
 
     //atividade 1.5
     
-    /* for (int c = 0; c < qtd_clientes; c++) {
+     for (int c = 0; c < qtd_clientes; c++) {
         cout << lista.clientes[c] << " comprou:";
         int tam = lista.compras[c].size();
         for (int j = 0; j < tam; j++) {
             cout << " " << lista.compras[c][j];
         }
         cout << "\n";
-    } */
+    } 
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

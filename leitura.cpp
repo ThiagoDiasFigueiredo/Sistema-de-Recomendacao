@@ -11,8 +11,9 @@ bool comparaPorNome(const Dados &a, const Dados &b) {
     return string(a.nome_produto) < string(b.nome_produto);
 }
 bool comparaPorCliente(const Dados &a, const Dados &b){
-    return string(a.cod_cliente) < string(b.cod_cliente);
+    return string(a.cliente) < string(b.cliente);
 }
+
 
 int leitura(int argc, char *argv[]) {
     
@@ -30,9 +31,10 @@ int leitura(int argc, char *argv[]) {
     Dados dados[1600];
     listaCompras lista;
 
-    int records = 0;    
+    int total = 0;    
     int lixo = 0;
-    int qtd_repetido_cliente = 0;
+    int 
+    qtd_cliente_unico = 0;
     int qtd_repetido_nome = 0;
     
     // Descarta o cabeçalho inicial
@@ -40,15 +42,15 @@ int leitura(int argc, char *argv[]) {
 
     char linha_lixo[512];
 
-    while (records < 1600) {
+    while (total < 1600) {
         int lido = fscanf(file, " %8[^,],%19[^,],%d,%199[^\r\n]",
-            dados[records].data,
-            dados[records].cod_cliente,
-            &dados[records].cod_produto,
-            dados[records].nome_produto);
+            dados[total].data,
+            dados[total].cliente,
+            &dados[total].produto,
+            dados[total].nome_produto);
         
         if (lido == 4) {
-            records++; // Leu corretamente
+            total++; // Leu corretamente
         } 
         else if (lido == EOF) {
             break; // Fim normal do arquivo
@@ -62,20 +64,21 @@ int leitura(int argc, char *argv[]) {
     fclose(file);
     //Filtrar os clientes
     
-    sort(dados, dados + records, comparaPorCliente);
-    for (int i = 0; i < records; i++) {
-        if (i > 0 && string(dados[i].cod_cliente) == string(dados[i - 1].cod_cliente)) {
+    sort(dados, dados + total, comparaPorCliente);
+    for (int i = 0; i < total; i++) {
+        if (i > 0 && string(dados[i].cliente) == string(dados[i - 1].cliente)) {
             continue;
         }else{
-            lista.codigo_clientes.push_back(dados[i].cod_cliente);
-            qtd_repetido_cliente++; 
+            lista.codigo_clientes.push_back(dados[i].cliente);
+            
+            qtd_cliente_unico++; 
         }
         
     }
-
+    
     // Filtrar o nome dos produtos
-    sort(dados, dados + records, comparaPorNome);
-    for (int i = 0; i < records; i++) {
+    sort(dados, dados + total, comparaPorNome);
+    for (int i = 0; i < total; i++) {
         if (i > 0 && string(dados[i].nome_produto) == string(dados[i - 1].nome_produto)) {
             continue;
         }else{
@@ -87,19 +90,19 @@ int leitura(int argc, char *argv[]) {
     }
     //Construindo o map dos codigos dos clientes
     int indice = 0;
-    for(int i = 0; i < records; i++){
-        string cod = dados[i].cod_cliente;
+    for(int i = 0; i < total; i++){
+        string cod = dados[i].cliente;
         if(lista.codigo.find(cod) == lista.codigo.end()){ //Cliente não está no map
             lista.codigo[cod] = indice;
             lista.codigo_clientes.push_back(cod);
             indice++;
         }
     }
-    //Construindoo map dos produtos
+    //Construindo o map dos produtos
     int qtd_repetido_produto = 0;
 
-    for (int i = 0; i < records; i++) {
-    int cod = dados[i].cod_produto;
+    for (int i = 0; i < total; i++) {
+    int cod = dados[i].produto;
 
     if (lista.codigo_prod.find(cod) == lista.codigo_prod.end()) {   // produto ainda não está no map
         lista.codigo_prod[cod] = qtd_repetido_produto;           // ID = próximo número livre
@@ -107,16 +110,30 @@ int leitura(int argc, char *argv[]) {
         qtd_repetido_produto++;
         }
     }
-    //Construindo o map das compras
+    //Monta o vector compra
+                    
+    int qtd_clientes;
+    for (int i = 0; i < total; i++) {
+
+        // cliente novo: primeiro registro ou código diferente do anterior
+        if (i == 0 || string(dados[i].cliente) != string(dados[i - 1].cliente)) {
+            qtd_clientes++;
+            lista.clientes.push_back(dados[i].cliente);
+            vector<int> vazia;
+            lista.compras.push_back(vazia);
+        }
+
+        // todo registro coloca seu produto na lista do cliente atual
+        lista.compras[qtd_clientes].push_back(dados[i].produto);
+    } 
     
-    // Exibe os produtos únicos filtrados
     //Atividade 1.1
-    /* for(int i = 0; i < qtd_repetido_cliente; i++){
+    /* for(int i = 0; i < qtd_cliente_unico; i++){
         cout << "[" << i+1 << "] elemento: " << lista.codigo_clientes[i] << "\n";
-    } */
-   //Exibe o map do codigo dos clientes
+    } */  
+   
     //atividade 1.2
-      /* for (int i = 0; i < qtd_repetido_cliente; i++){
+      /* for (int i = 0; i < qtd_cliente_unico; i++){
         cout << lista.codigo_clientes[i]<< "->" << i << "\n";  
     } */ 
 
@@ -125,17 +142,29 @@ int leitura(int argc, char *argv[]) {
         cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
     } */ 
  
-    //exibe o map do codigo dos produtos
-    //Atividade 1.4
-      /* for (auto &p : lista.codigo_prod) { //exibe em ordem crescente as chaves
-    cout << p.first << " -> " << p.second << "\n";   // código -> ID
-    }   */ 
-
     
-    printf("\nTotal de registros validos lidos: %d\n", records);
+    //Atividade 1.4
+    /*  for (auto &p : lista.codigo_prod) { //exibe em ordem crescente as chaves
+    cout << p.first << " -> " << p.second << "\n";   // código -> ID
+    } */   
+
+    //atividade 1.5
+    
+    /* for (int c = 0; c < qtd_clientes; c++) {
+        cout << lista.clientes[c] << " comprou:";
+        int tam = lista.compras[c].size();
+        for (int j = 0; j < tam; j++) {
+            cout << " " << lista.compras[c][j];
+        }
+        cout << "\n";
+    } */
+    
+    printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);
     printf("Total de produtos unicos: %d\n", qtd_repetido_nome);
-    printf("Total de clientes unicos: %d\n",qtd_repetido_cliente);
+    printf("Total de clientes unicos: %d\n",qtd_cliente_unico);
 
     return 0;
+
 }
+

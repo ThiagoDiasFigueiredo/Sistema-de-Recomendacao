@@ -30,7 +30,7 @@ typedef struct
 }listaCompras;
 
 
-int leitura(int argc, char *argv[]);
+int leitura(int argc, char *argv[], listaCompras &lista);
 bool comparaPorNome(const Dados &a, const Dados &b);
 bool comparaPorCliente(const Dados &a, const Dados &b);
 

@@ -17,7 +17,7 @@ bool comparaPorCliente(const Dados &a, const Dados &b){
 }
 
 
-int leitura(int argc, char *argv[]) {
+int leitura(int argc, char *argv[], listaCompras &lista) {
     
     if (argc != 2) {
         printf("Uso: %s <dados/dados_venda_cluster_0.csv>\n", argv[0]);
@@ -31,7 +31,6 @@ int leitura(int argc, char *argv[]) {
         return 1;
     }
     Dados dados[1600];
-    listaCompras lista;
 
     int total = 0;    
     int lixo = 0;
@@ -101,7 +100,7 @@ int leitura(int argc, char *argv[]) {
         }
     }
     //Construindo o map dos produtos
-    int qtd_repetido_produto = 1;
+    int qtd_repetido_produto = 0;
 
     for (int i = 0; i < total; i++) {
     int cod = dados[i].produto;
@@ -126,7 +125,16 @@ int leitura(int argc, char *argv[]) {
         }
 
         // todo registro coloca seu produto na lista do cliente atual
-        lista.compras[qtd_clientes].push_back(dados[i].produto);
+        int id_prod = lista.codigo_prod[dados[i].produto];
+        bool repetido = false;
+        for (int j = 0; j < (int)lista.compras[qtd_clientes].size(); j++) {
+            if (lista.compras[qtd_clientes][j] == id_prod) {
+                repetido = true;
+            }
+        }
+        if (!repetido) {
+            lista.compras[qtd_clientes].push_back(id_prod);
+        }
     } 
     
     //Atividade 1.1

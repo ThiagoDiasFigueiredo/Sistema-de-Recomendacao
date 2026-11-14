@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
+#include "leitura.h"
 
-typedef struct NO {
-    int id_produto;
-    struct NO* proximo;
-} NO;
-
+using namespace std;
 
 int** alocarMatrizInt(int linhas, int colunas) {
     int** matriz = (int**)malloc(linhas * sizeof(int*));
@@ -45,17 +43,16 @@ void liberarMatrizDouble(double** matriz, int linhas) {
     free(matriz);
 }
 
-int** calcula_intercecao(NO** lista_compra, int ncliente, int nproduto){
+int** calcula_intercecao(const vector<vector<int>>& lista_compra, int ncliente, int nproduto){
     int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
     int** transposta = alocarMatrizInt(nproduto, ncliente);
     
     //preenche a matriz de compra de acordo com a lista da etapa 1
+
     for (int i = 0; i < ncliente; i++) {
-        NO* atual = lista_compra[i];
-        while (atual != NULL) {
-            int id_produto = atual->id_produto;
+        for (int j = 0; j < (int)lista_compra[i].size(); j++) {
+            int id_produto = lista_compra[i][j];
             matrizCompra[i][id_produto] = 1;
-            atual = atual->proximo;//pula para o proximo produto
         }
     }
 
@@ -82,15 +79,10 @@ int** calcula_intercecao(NO** lista_compra, int ncliente, int nproduto){
     return I;
 }
 
-void calcularJaccard(int** I, NO** listaCompra, double** S, int nCliente) {
+void calcularJaccard(int** I, const vector<vector<int>>& listaCompra, double** S, int nCliente) {
     for (int i = 0; i < nCliente; i++) {
         // Conta quantos elementos existem na lista do cliente i (vinda da Etapa 1) para achar |P_i|
-        int tamanho_Pi = 0;
-        NO* atual = listaCompra[i];
-        while (atual != NULL) {
-            tamanho_Pi++;
-            atual = atual->proximo;
-        }
+        int tamanho_Pi = listaCompra[i].size();
         
         // Aplica a fórmula do quadro: S[i][j] = 1 - (I[i][j] / |P_i|)
         for (int j = 0; j < nCliente; j++) {
@@ -104,7 +96,7 @@ void calcularJaccard(int** I, NO** listaCompra, double** S, int nCliente) {
 }
 
 
-void calcularSimilaridade(NO** listaCompra, double** S, int nCliente, int nProd) {
+void calcularSimilaridade(const vector<vector<int>>& listaCompra, double** S, int nCliente, int nProd) {
     int** I = calcula_intercecao(listaCompra, nCliente, nProd);
 
     calcularJaccard(I, listaCompra, S, nCliente);

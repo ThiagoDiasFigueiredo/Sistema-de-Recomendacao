@@ -8,12 +8,46 @@
 #include <string>
 using namespace std;
 
-// Função para ordenar os structs pelo nome do produto
 bool comparaPorNome(const Dados &a, const Dados &b) {
     return string(a.nome_produto) < string(b.nome_produto);
 }
 bool comparaPorCliente(const Dados &a, const Dados &b){
     return string(a.cliente) < string(b.cliente);
+}
+
+void AtividadeUm(const listaCompras &lista, int qtd_cliente_unico) {
+    for (int i = 0; i < qtd_cliente_unico; i++) {
+        cout << "[" << i << "] elemento: " << lista.codigo_clientes[i] << "\n";
+    }
+}
+
+void AtividadeDois(const listaCompras &lista, int qtd_cliente_unico) {
+    for (int i = 0; i < qtd_cliente_unico; i++) {
+        cout << lista.codigo_clientes[i] << "->" << i << "\n";
+    }
+}
+
+void AtividadeTres(const listaCompras &lista, int qtd_repetido_nome) {
+    for (int i = 0; i < qtd_repetido_nome; i++) {
+        cout << "[" << i << "] elemento: " << lista.nome_produtos[i] << "\n";
+    }
+}
+
+void AtividadeQuatro(const listaCompras &lista) {
+    for (const auto &p : lista.codigo_prod) {
+        cout << p.first << " -> " << p.second << "\n";
+    }
+}
+
+void AtividadeCinco(const listaCompras &lista, int qtd_clientes) {
+    for (int i = 0; i < qtd_clientes; i++) {
+        cout << lista.clientes[i] << " comprou:";
+        int tam = lista.compras[i].size();
+        for (int j = 0; j < tam; j++) {
+            cout << " " << lista.compras[i][j];
+        }
+        cout << "\n";
+    }
 }
 
 int leitura(int argc, char *argv[], listaCompras &lista) {
@@ -29,12 +63,11 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         perror("Erro ao abrir o file");
         return 1;
     }
-    Dados dados[1600];
+    Dados dados[1700];
 
     int total = 0;    
     int lixo = 0;
-    int 
-    qtd_cliente_unico = 0;
+    int qtd_cliente_unico = 0;
     int qtd_repetido_nome = 0;
     
     // Descarta o cabeçalho inicial
@@ -62,7 +95,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
     }
 
     fclose(file);
-    //Filtrar os clientes
+    //Filtrar os clientes ATIVIDADE 1.1
     
     sort(dados, dados + total, comparaPorCliente);
     for (int i = 0; i < total; i++) {
@@ -76,7 +109,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         
     }
     
-    // Filtrar o nome dos produtos
+    // Filtrar o nome dos produtos ATIVIDADE 1.3
     sort(dados, dados + total, comparaPorNome);
     for (int i = 0; i < total; i++) {
         if (i > 0 && string(dados[i].nome_produto) == string(dados[i - 1].nome_produto)) {
@@ -88,7 +121,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         }
        
     }
-    //Construindo o map dos codigos dos clientes
+    //Construindo o map dos codigos dos clientes ATIVIDADE 1.2
     int indice = 0;
     for(int i = 0; i < total; i++){
         string cod = dados[i].cliente;
@@ -98,7 +131,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
             indice++;
         }
     }
-    //Construindo o map dos produtos
+    //Construindo o map dos produtos ATIVIDADE 1.4
     int qtd_repetido_produto = 0;
 
     for (int i = 0; i < total; i++) {
@@ -110,12 +143,12 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         qtd_repetido_produto++;
         }
     }
-    //Monta o vector compra
+    //Monta o vector compra ATIVIDADE 1.5
     sort(dados, dados + total, comparaPorCliente); 
     int qtd_clientes = -1;
     for (int i = 0; i < total; i++) {
 
-        // cliente novo: primeiro registro ou código diferente do anterior
+        
         if (i == 0 || string(dados[i].cliente) != string(dados[i - 1].cliente)) {
             qtd_clientes++;
             lista.clientes.push_back(dados[i].cliente);
@@ -123,7 +156,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
             lista.compras.push_back(vazia);
         }
 
-        // todo registro coloca seu produto na lista do cliente atual
+        
         int id_prod = lista.codigo_prod[dados[i].produto]+1;
         bool repetido = false;
         for (int j = 0; j < (int)lista.compras[qtd_clientes].size(); j++) {
@@ -136,37 +169,13 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         }
     } 
     
-    //Atividade 1.1
-    /* for(int i = 0; i < qtd_cliente_unico; i++){
-        cout << "[" << i+1 << "] elemento: " << lista.codigo_clientes[i] << "\n";
-    } */   
-   
-    //atividade 1.2
-    /* for (int i = 0; i < qtd_cliente_unico; i++){
-        cout << lista.codigo_clientes[i]<< "->" << i << "\n";  
-    } */  
+    //EXECUÇÃO DAS ATIVIDADES
 
-    //Atividade 1.3
-    
-     /* for(int i = 0; i < qtd_repetido_nome; i++){
-        cout << "[" << i+1 << "] elemento: " << lista.nome_produtos[i] << "\n";
-    } */  
- 
-    //Atividade 1.4
-    /*   for (auto &p : lista.codigo_prod) { //exibe em ordem crescente as chaves
-    cout << p.first << " -> " << p.second << "\n";   // código -> ID
-    }  */   
-
-    //atividade 1.5
-    
-      /* for (int c = 0; c < qtd_clientes; c++) {
-        cout << lista.clientes[c] << " comprou:";
-        int tam = lista.compras[c].size();
-        for (int j = 0; j < tam; j++) {
-            cout << " " << lista.compras[c][j];
-        }
-        cout << "\n";
-    } */
+    //AtividadeUm(lista, qtd_cliente_unico);
+    //AtividadeDois(lista, qtd_cliente_unico);
+    //AtividadeTres(lista, qtd_repetido_nome);
+    //AtividadeQuatro(lista);
+    //AtividadeCinco(lista, qtd_clientes + 1);   
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

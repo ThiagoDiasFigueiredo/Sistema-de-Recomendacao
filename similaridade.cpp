@@ -132,7 +132,7 @@ int similaridade(listaCompras &lista){
     calcularSimilaridade(lista.compras, S, nCliente, nProd);
 
     // Acha o cliente mais similar ao 0
-    int cliente_alvo = 0;
+    int cliente_alvo = 840;
     int mais_similar = encontrarClienteMaisSimilar(S, nCliente, cliente_alvo);
 
     printf("\n=== Resultado Etapa 2 (Similaridade) ===\n");

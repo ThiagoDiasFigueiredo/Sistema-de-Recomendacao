@@ -1,29 +1,35 @@
 #ifndef RECOMENDACAO_H
 #define RECOMENDACAO_H
 
-#include "leitura.h"   
-
+#include "leitura.h"
 
 typedef struct
 {
-    int id; //ID interno do produto
-    double valor; //nota R dele
+    int id;       // ID interno do produto
+    double valor; // Nota R de ranqueamento
 } Ranking;
 
-// Estado do ranqueamento dos produtos para um cliente c
-typedef struct
-{
-    vector<double> vetorR;  // vetorR[p] - começa em 1
-    vector<int> marca;      // marca[p] - último vizinho que atualizou p (-1 = nunca atualizado)
-    vector<int> comprado;   // comprado[p] - 1 se o cliente c já comprou o produto p
-} Ranqueamento;
-
 bool comparaPorValor(const Ranking &a, const Ranking &b);
-void indentificarVizinhos(double** S,int numCliente,int c,vector<int> &L);
-void inicializaRanqueamento(const vector<vector<int>> &compras,int numProd,int c,Ranqueamento &R);
-void calcularRanqueamento(Ranqueamento &R, const vector<vector<int> >& compras,double** S, const vector<int> &L, int c);
-void ordenaEseleciona(const Ranqueamento &R, int nProd, int k,vector<Ranking> &resultado);
-vector<Ranking> recomendar(const vector<vector<int>> &compras, double** S,int nCliente, int nProd, int c, int k);
+
+// Atividade 3.1
+int indentificarVizinhos(double** S, int numCliente, int c, int* L);
+
+// Atividade 3.2
+void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int c,
+                            double* vetorR, int* marca, int* comprado);
+
+// Atividade 3.3
+void calcularRanqueamento(double* vetorR, int* marca, const int* comprado,
+                          const vector<vector<int>> &compras, double** S,
+                          const int* L, int tamL, int c, int numProd);
+
+// Atividade 3.4
+int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado,
+                     int nProd, int k, Ranking* resultado);
+
+Ranking* recomendar(const vector<vector<int>> &compras, double** S,
+                    int nCliente, int nProd, int c, int k, int* qtdRecomendados);
+
 int recomendacao(listaCompras &lista, int cliente, int k);
 
 #endif

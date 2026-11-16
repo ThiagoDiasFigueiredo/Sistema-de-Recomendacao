@@ -2,16 +2,13 @@
 #define SIMILARIDADE_H
 
 #include "leitura.h"
+#include "alocar_matriz.h"
 
 #include <iostream>
 #include <vector>
 #include<map>
 #include <string>
 
-int** alocarMatrizInt(int linhas, int colunas);
-double** alocarMatrizDouble(int linhas, int colunas);
-void liberarMatrizInt(int** matriz, int linhas);
-void liberarMatrizDouble(double** matriz, int linhas);
 int** calcula_intercecao(const vector<vector<int>>& lista_compra, int ncliente, int nproduto);
 void calcularJaccard(int** I, const vector<vector<int>>& listaCompra, double** S, int nCliente);
 void calcularSimilaridade(const vector<vector<int>>& listaCompra, double** S, int nCliente, int nProd);

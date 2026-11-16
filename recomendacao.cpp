@@ -1,108 +1,148 @@
 #include "recomendacao.h"
 #include "Similaridade.h"
+#include "alocar_matriz.h"
 
 #include <stdio.h>
-#include <vector>
+#include <stdlib.h>
 #include <algorithm>
 
-bool comparaPorValor(const Ranking &a, const Ranking &b){
-    if(a.valor != b.valor){
+bool comparaPorValor(const Ranking &a, const Ranking &b) {
+    if (a.valor != b.valor) {
         return a.valor < b.valor;
     }
     return a.id < b.id;
 }
-//Atividade 3.1
-void indentificarVizinhos(double** S,int numCliente,int c,vector<int> &L){ 
-    for(int i = 0; i < numCliente;i++){
-        if(i != c && S[c][i] < 1){ //Clientes diferentes e menores que 1
-            L.push_back(i);
+
+// Atividade 3.1 - Identifica vizinhos usando vetor alocado com malloc
+int indentificarVizinhos(double** S, int numCliente, int c, int* L) {
+    int tamL = 0;
+    for (int i = 0; i < numCliente; i++) {
+        if (i != c && S[c][i] < 1.0) { // Clientes diferentes e distancia menor que 1
+            L[tamL] = i;
+            tamL++;
+        }
+    }
+    return tamL;
+}
+
+// Atividade 3.2 - Inicializa os vetores de ranqueamento alocados com malloc
+void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int c,
+                            double* vetorR, int* marca, int* comprado) {
+    // Inicializa de 0 ate numProd (numProd + 1 posicoes por seguranca caso ID comece em 1)
+    for (int i = 0; i <= numProd; i++) {
+        vetorR[i] = 1.0;   // Cada produto recebe 1
+        marca[i] = -1;     // Produto nao atualizado
+        comprado[i] = 0;   // Cliente ainda nao comprou
+    }
+
+    int qtdComprada = (int)compras[c].size();
+    const int* produtosCliente = compras[c].data();
+    for (int i = 0; i < qtdComprada; i++) {
+        int prodId = produtosCliente[i];
+        if (prodId >= 0 && prodId <= numProd) {
+            comprado[prodId] = 1; // Marca 1 nos produtos ja comprados pelo cliente c
         }
     }
 }
 
-//Atividade 3.2
-void inicializaRanqueamento(const vector<vector<int>> &compras,int numProd,int c,Ranqueamento &R){
-    for(int i = 0; i < numProd; i++){
-        R.vetorR.push_back(1); //Cada produto recebe 1
-        R.marca.push_back(-1); //Produto não atualizado
-        R.comprado.push_back(0); //Cliente ainda não comprou
-    }
-    for(int i = 0; i < compras[c].size();i++){
-        R.comprado[compras[c][i]] = 1; //Coloca 1 nos produtos comprados pelo cliente
-    }
-}
-
-//Atividade 3.3
- void calcularRanqueamento(Ranqueamento &R, const vector<vector<int> >& compras,double** S, const vector<int> &L, int c) {
-    for (int i = 0; i < L.size(); i++) {
+// Atividade 3.3 - Calcula o ranqueamento percorrendo ponteiros alocados com malloc
+void calcularRanqueamento(double* vetorR, int* marca, const int* comprado,
+                          const vector<vector<int>> &compras, double** S,
+                          const int* L, int tamL, int c, int numProd) {
+    for (int i = 0; i < tamL; i++) {
         int v = L[i];
-        for (int j = 0; j < compras[v].size(); j++) {
-            int p = compras[v][j];
-            if (R.comprado[p] == 0 && R.marca[p] != v) {
-                R.vetorR[p] = R.vetorR[p] * S[c][v]; //QUANTO MAIS PARECIDO OS CLIENTES, MENOR A NOTA FICA
-                R.marca[p] = v;
+        int qtdComprasVizinho = (int)compras[v].size();
+        const int* produtosVizinho = compras[v].data();
+
+        for (int j = 0; j < qtdComprasVizinho; j++) {
+            int p = produtosVizinho[j];
+            if (p >= 0 && p < numProd) {
+                if (comprado[p] == 0 && marca[p] != v) {
+                    vetorR[p] = vetorR[p] * S[c][v];
+                    marca[p] = v;
+                }
             }
         }
     }
 }
 
-//Atividade 3.4
-void ordenaEseleciona(const Ranqueamento &R, int nProd, int k,vector<Ranking> &resultado) {
-    vector<Ranking> candidatos;
+// Atividade 3.4 - Ordena candidatos e seleciona os k melhores usando malloc
+int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado,
+                     int nProd, int k, Ranking* resultado) {
+    Ranking* candidatos = (Ranking*)malloc(nProd * sizeof(Ranking));
+    int qtdCandidatos = 0;
+
     for (int p = 0; p < nProd; p++) {
-        if (R.comprado[p] == 0 && R.marca[p] != -1) { //cliente C não comprou(==0) e q algum vizinho passou (!=-1)
-            Ranking r;
-            r.id = p;
-            r.valor = R.vetorR[p];
-            candidatos.push_back(r);
+        if (comprado[p] == 0 && marca[p] != -1) {
+            candidatos[qtdCandidatos].id = p;
+            candidatos[qtdCandidatos].valor = vetorR[p];
+            qtdCandidatos++;
         }
     }
 
-    sort(candidatos.begin(), candidatos.end(), comparaPorValor);
+    std::sort(candidatos, candidatos + qtdCandidatos, comparaPorValor);
 
-    for (int i = 0; i < candidatos.size() && i < k; i++) {
-        resultado.push_back(candidatos[i]);
+    int qtdResultado = 0;
+    for (int i = 0; i < qtdCandidatos && i < k; i++) {
+        resultado[qtdResultado] = candidatos[i];
+        qtdResultado++;
     }
+
+    free(candidatos);
+    return qtdResultado;
 }
 
-vector<Ranking> recomendar(const vector<vector<int> >& compras, double** S,int nCliente, int nProd, int c, int k) {
-    vector<int> L;
-    Ranqueamento R;
-    vector<Ranking> resultado;
+Ranking* recomendar(const vector<vector<int>> &compras, double** S,
+                    int nCliente, int nProd, int c, int k, int* qtdRecomendados) {
+    // Aloca todas as estruturas dinamicamente com malloc
+    int* L = (int*)malloc(nCliente * sizeof(int));
+    double* vetorR = (double*)malloc((nProd + 1) * sizeof(double));
+    int* marca = (int*)malloc((nProd + 1) * sizeof(int));
+    int* comprado = (int*)malloc((nProd + 1) * sizeof(int));
+    Ranking* resultado = (Ranking*)malloc(k * sizeof(Ranking));
 
-    indentificarVizinhos(S,nCliente,c,L);
-    inicializaRanqueamento(compras, nProd, c, R);
-    calcularRanqueamento(R, compras, S, L, c);
-    ordenaEseleciona(R, nProd, k, resultado);
+    int tamL = indentificarVizinhos(S, nCliente, c, L);
+    inicializaRanqueamento(compras, nProd, c, vetorR, marca, comprado);
+    calcularRanqueamento(vetorR, marca, comprado, compras, S, L, tamL, c, nProd);
+    *qtdRecomendados = ordenaEseleciona(vetorR, marca, comprado, nProd, k, resultado);
+
+    // Libera os vetores auxiliares
+    free(L);
+    free(vetorR);
+    free(marca);
+    free(comprado);
+
     return resultado;
 }
 
 int recomendacao(listaCompras &lista, int cliente, int k) {
-    int nCliente = lista.compras.size();
-    int nProd = lista.codigo_produtos.size();
+    int nCliente = (int)lista.compras.size();
+    int nProd = (int)lista.codigo_produtos.size();
 
     if (cliente < 0 || cliente >= nCliente) {
         printf("Cliente invalido: %d\n", cliente);
         return 1;
     }
 
-    // Reaproveita as funções da etapa 2 para calcular S
+    // Reaproveita as funcoes da etapa 2 e o alocar_matriz.h para calcular S
     double** S = alocarMatrizDouble(nCliente, nCliente);
     calcularSimilaridade(lista.compras, S, nCliente, nProd);
 
-    vector<Ranking> rec = recomendar(lista.compras, S, nCliente, nProd, cliente, k);
+    int qtdRec = 0;
+    Ranking* rec = recomendar(lista.compras, S, nCliente, nProd, cliente, k, &qtdRec);
 
     printf("Cliente consultado: Indice %d (Codigo: %s)\n",
            cliente, lista.clientes[cliente].c_str());
 
-    if (rec.empty()) {
+    if (qtdRec == 0) {
         printf("Nenhum produto para recomendar.\n");
     }
-    for (int i = 0; i < rec.size(); i++) {
+    for (int i = 0; i < qtdRec; i++) {
         printf("%d) Produto codigo %d (indice %d) - R = %.4f\n",
                i + 1, lista.codigo_produtos[rec[i].id], rec[i].id, rec[i].valor);
     }
 
+    free(rec);
     liberarMatrizDouble(S, nCliente);
     return 0;
 }

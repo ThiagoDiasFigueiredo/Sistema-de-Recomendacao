@@ -22,6 +22,7 @@ void AtividadeUm(const listaCompras &lista, int qtd_cliente_unico) {
 }
 
 void AtividadeDois(const listaCompras &lista, int qtd_cliente_unico) {
+
     for (int i = 0; i < qtd_cliente_unico; i++) {
         cout << lista.codigo_clientes[i] << "->" << i << "\n";
     }
@@ -33,14 +34,14 @@ void AtividadeTres(const listaCompras &lista, int qtd_repetido_nome) {
     }
 }
 
-void AtividadeQuatro(const listaCompras &lista) {
-    for (const auto &p : lista.codigo_prod) {
-        cout << p.first << " -> " << p.second << "\n";
+void AtividadeQuatro(const listaCompras &lista,int qnt_produto) {
+    for(int i = 0; i < qnt_produto; i++){
+        cout << lista.codigo_produtos[i] << "->" << i << "\n";
     }
 }
 
-void AtividadeCinco(const listaCompras &lista, int qtd_clientes) {
-    for (int i = 0; i < qtd_clientes; i++) {
+void AtividadeCinco(const listaCompras &lista, int pos_cliente) {
+    for (int i = 0; i < pos_cliente; i++) {
         cout << lista.clientes[i] << " comprou:";
         int tam = lista.compras[i].size();
         for (int j = 0; j < tam; j++) {
@@ -108,7 +109,17 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         }
         
     }
-    
+    //Construindo o map dos codigos dos clientes ATIVIDADE 1.2
+    int indice = 0;
+    for(int i = 0; i < total; i++){
+        string cod = dados[i].cliente;
+        if(lista.codigo.find(cod) == lista.codigo.end()){ //Cliente não está no map
+            lista.codigo[cod] = indice;
+            lista.codigo_clientes.push_back(cod);
+            indice++;
+        }
+    }
+
     // Filtrar o nome dos produtos ATIVIDADE 1.3
     sort(dados, dados + total, comparaPorNome);
     for (int i = 0; i < total; i++) {
@@ -121,16 +132,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         }
        
     }
-    //Construindo o map dos codigos dos clientes ATIVIDADE 1.2
-    int indice = 0;
-    for(int i = 0; i < total; i++){
-        string cod = dados[i].cliente;
-        if(lista.codigo.find(cod) == lista.codigo.end()){ //Cliente não está no map
-            lista.codigo[cod] = indice;
-            lista.codigo_clientes.push_back(cod);
-            indice++;
-        }
-    }
+    
     //Construindo o map dos produtos ATIVIDADE 1.4
     int qtd_repetido_produto = 0;
 
@@ -143,29 +145,30 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         qtd_repetido_produto++;
         }
     }
+
     //Monta o vector compra ATIVIDADE 1.5
     sort(dados, dados + total, comparaPorCliente); 
-    int qtd_clientes = -1;
+    int pos_cliente = -1;
     for (int i = 0; i < total; i++) {
 
         
         if (i == 0 || string(dados[i].cliente) != string(dados[i - 1].cliente)) {
-            qtd_clientes++;
+            pos_cliente++;
             lista.clientes.push_back(dados[i].cliente);
             vector<int> vazia;
             lista.compras.push_back(vazia);
         }
 
         
-        int id_prod = lista.codigo_prod[dados[i].produto]+1;
+        int id_prod = lista.codigo_prod[dados[i].produto];
         bool repetido = false;
-        for (int j = 0; j < (int)lista.compras[qtd_clientes].size(); j++) {
-            if (lista.compras[qtd_clientes][j] == id_prod) {
+        for (int j = 0; j < (int)lista.compras[pos_cliente].size(); j++) {
+            if (lista.compras[pos_cliente][j] == id_prod) {
                 repetido = true;
             }
         }
         if (!repetido) {
-            lista.compras[qtd_clientes].push_back(id_prod);
+            lista.compras[pos_cliente].push_back(id_prod);
         }
     } 
     
@@ -174,8 +177,8 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
     //AtividadeUm(lista, qtd_cliente_unico);
     //AtividadeDois(lista, qtd_cliente_unico);
     //AtividadeTres(lista, qtd_repetido_nome);
-    //AtividadeQuatro(lista);
-    //AtividadeCinco(lista, qtd_clientes + 1);   
+    //AtividadeQuatro(lista,qtd_repetido_produto);
+    //AtividadeCinco(lista, pos_cliente);   
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

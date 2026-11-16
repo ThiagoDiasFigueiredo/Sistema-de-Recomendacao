@@ -18,8 +18,12 @@ typedef struct
     vector<int> comprado;   // comprado[p] - 1 se o cliente c já comprou o produto p
 } Ranqueamento;
 
+bool comparaPorValor(const Ranking &a, const Ranking &b);
+void indentificarVizinhos(double** S,int numCliente,int c,vector<int> &L);
+void inicializaRanqueamento(const vector<vector<int>> &compras,int numProd,int c,Ranqueamento &R);
+void calcularRanqueamento(Ranqueamento &R, const vector<vector<int> >& compras,double** S, const vector<int> &L, int c);
+void ordenaEseleciona(const Ranqueamento &R, int nProd, int k,vector<Ranking> &resultado);
 vector<Ranking> recomendar(const vector<vector<int>> &compras, double** S,int nCliente, int nProd, int c, int k);
-
 int recomendacao(listaCompras &lista, int cliente, int k);
 
 #endif

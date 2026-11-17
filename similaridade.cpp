@@ -94,7 +94,7 @@ int similaridade(listaCompras &lista){
     double** S = alocarMatrizDouble(nCliente, nCliente);
     calcularSimilaridade(lista.compras, S, nCliente, nProd);
 
-    // Acha o cliente mais similar ao 0
+    // Acha o cliente mais similar ao 840
     int cliente_alvo = 840;
     int mais_similar = encontrarClienteMaisSimilar(S, nCliente, cliente_alvo);
 

@@ -29,7 +29,7 @@ int indentificarVizinhos(double** S, int numCliente, int c, int* L) {
 void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int c,
                             double* vetorR, int* marca, int* comprado) {
     // Inicializa de 0 ate numProd (numProd + 1 posicoes por seguranca caso ID comece em 1)
-    for (int i = 0; i <= numProd; i++) {
+    for (int i = 0; i < numProd; i++) {
         vetorR[i] = 1.0;   // Cada produto recebe 1
         marca[i] = -1;     // Produto nao atualizado
         comprado[i] = 0;   // Cliente ainda nao comprou

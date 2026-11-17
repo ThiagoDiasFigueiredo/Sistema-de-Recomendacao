@@ -34,7 +34,6 @@ int leitura(int argc, char *argv[], listaCompras &lista);
 bool comparaPorNome(const Dados &a, const Dados &b);
 bool comparaPorCliente(const Dados &a, const Dados &b);
 
-// Atividades (chamadas de dentro da leitura)
 void AtividadeUm(const listaCompras &lista, int qtd_cliente_unico);     // 1.1 clientes unicos
 void AtividadeDois(const listaCompras &lista, int qtd_cliente_unico);   // 1.2 cliente -> indice
 void AtividadeTres(const listaCompras &lista, int qtd_repetido_nome);   // 1.3 nomes dos produtos

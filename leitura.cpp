@@ -64,7 +64,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         perror("Erro ao abrir o file");
         return 1;
     }
-    Dados dados[1700];
+    Dados dados[1600];
 
     int total = 0;    
     int lixo = 0;
@@ -176,9 +176,9 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
 
     //AtividadeUm(lista, qtd_cliente_unico);
     //AtividadeDois(lista, qtd_cliente_unico);
-    //AtividadeTres(lista, qtd_repetido_nome);
+    AtividadeTres(lista, qtd_repetido_nome);
     //AtividadeQuatro(lista,qtd_repetido_produto);
-    //AtividadeCinco(lista, pos_cliente);   
+    AtividadeCinco(lista, pos_cliente);   
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

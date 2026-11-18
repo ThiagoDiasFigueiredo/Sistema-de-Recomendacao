@@ -9,14 +9,6 @@
 
 using namespace std;
 
-typedef struct 
-{
-    char data[9];
-    char cliente[20];
-    int produto;
-    char nome_produto[200];
-
-}Dados;
 
 typedef struct
 {
@@ -32,8 +24,6 @@ typedef struct
 
 
 int leitura(int argc, char *argv[], listaCompras &lista);
-bool comparaPorNome(const Dados &a, const Dados &b);
-bool comparaPorCliente(const Dados &a, const Dados &b);
 
 void AtividadeUm(const listaCompras &lista, int qtd_cliente_unico);     // 1.1 clientes unicos
 void AtividadeDois(const listaCompras &lista, int qtd_cliente_unico);   // 1.2 cliente -> indice

@@ -131,9 +131,9 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
     
     //EXECUÇÃO DAS ATIVIDADES
 
-    //AtividadeUm(lista, qtd_cliente_unico);
+    AtividadeUm(lista, qtd_cliente_unico);
     //AtividadeDois(lista, qtd_cliente_unico);
-    AtividadeTres(lista, qtd_repetido_nome);
+    //AtividadeTres(lista, qtd_repetido_nome);
     //AtividadeQuatro(lista, qtd_repetido_produto);
     AtividadeCinco(lista, qtd_cliente_unico);   
     

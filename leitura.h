@@ -1,6 +1,7 @@
 #ifndef LEITURA_H
 #define LEITURA_H
 
+#include <list>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -25,7 +26,7 @@ typedef struct
     map<int,int> codigo_prod;
     map<string,int> codigo;
     vector<string> clientes;          // código de cada cliente
-    vector<vector<int>> compras;
+    list<vector<int>> compras;
     
 }listaCompras;
 

@@ -9,15 +9,15 @@
 
 using namespace std;
 
-int** calcula_intercecao(const vector<vector<int>>& lista_compra, int ncliente, int nproduto){
+int** calcula_intercecao(const list<vector<int>>& lista_compra, int ncliente, int nproduto){
     int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
     int** transposta = alocarMatrizInt(nproduto, ncliente);
     
     //preenche a matriz de compra de acordo com a lista da etapa 1
-
-    for (int i = 0; i < ncliente; i++) {
-        for (int j = 0; j < (int)lista_compra[i].size(); j++) {
-            int id_produto = lista_compra[i][j];
+    auto it = lista_compra.begin();
+    for (int i = 0; i < ncliente && it != lista_compra.end(); i++, ++it) {
+        for (int j = 0; j < (int)it->size(); j++) {
+            int id_produto = (*it)[j];
             matrizCompra[i][id_produto] = 1;
         }
     }
@@ -45,10 +45,11 @@ int** calcula_intercecao(const vector<vector<int>>& lista_compra, int ncliente, 
     return I;
 }
 
-void calcularJaccard(int** I, const vector<vector<int>>& listaCompra, double** S, int nCliente) {
-    for (int i = 0; i < nCliente; i++) {
+void calcularJaccard(int** I, const list<vector<int>>& listaCompra, double** S, int nCliente) {
+    auto it = listaCompra.begin();
+    for (int i = 0; i < nCliente && it != listaCompra.end(); i++, ++it) {
         // Conta quantos elementos existem na lista do cliente i (vinda da Etapa 1) para achar |P_i|
-        int tamanho_Pi = listaCompra[i].size();
+        int tamanho_Pi = it->size();
         
         // Aplica a fórmula do quadro: S[i][j] = 1 - (I[i][j] / |P_i|)
         for (int j = 0; j < nCliente; j++) {
@@ -62,7 +63,7 @@ void calcularJaccard(int** I, const vector<vector<int>>& listaCompra, double** S
 }
 
 
-void calcularSimilaridade(const vector<vector<int>>& listaCompra, double** S, int nCliente, int nProd) {
+void calcularSimilaridade(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd) {
     int** I = calcula_intercecao(listaCompra, nCliente, nProd);
 
     calcularJaccard(I, listaCompra, S, nCliente);

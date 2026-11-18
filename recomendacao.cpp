@@ -26,7 +26,7 @@ int indentificarVizinhos(double** S, int numCliente, int c, int* L) {
 }
 
 // Atividade 3.2 - Inicializa os vetores de ranqueamento alocados com malloc
-void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int c,
+void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c,
                             double* vetorR, int* marca, int* comprado) {
     
     for (int i = 0; i < numProd; i++) {
@@ -35,8 +35,11 @@ void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int
         comprado[i] = 0;   // Cliente ainda nao comprou
     }
 
-    int qtdComprada = (int)compras[c].size();
-    const int* produtosCliente = compras[c].data();
+    auto it = compras.begin();
+    advance(it, c);
+
+    int qtdComprada = (int)it->size();
+    const int* produtosCliente = it->data();
     for (int i = 0; i < qtdComprada; i++) {
         int prodId = produtosCliente[i];
         if (prodId >= 0 && prodId <= numProd) {
@@ -47,14 +50,18 @@ void inicializaRanqueamento(const vector<vector<int>> &compras, int numProd, int
 
 // Atividade 3.3 - Calcula o ranqueamento percorrendo ponteiros alocados com malloc
 void calcularRanqueamento(double* notaProduto, int* ultimoVizinho, const int* clienteComprou,
-                          const vector<vector<int>> &compras, double** distancia,
+                          const list<vector<int>> &compras, double** distancia,
                           const int* vizinhos, int qtdVizinhos, int cliente, int qtdProdutos) {
 
     // para cada vizinho do cliente
     for (int posVizinho = 0; posVizinho < qtdVizinhos; posVizinho++) {
         int vizinho = vizinhos[posVizinho];
-        int qtdProdutosVizinho = (int)compras[vizinho].size();
-        const int* produtosVizinho = compras[vizinho].data();
+        
+        auto it = compras.begin();
+        advance(it, vizinho);
+
+        int qtdProdutosVizinho = (int)it->size();
+        const int* produtosVizinho = it->data();
 
         // para cada produto que esse vizinho comprou
         for (int posProduto = 0; posProduto < qtdProdutosVizinho; posProduto++) {
@@ -96,7 +103,7 @@ int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado
     return qtdResultado;
 }
 
-Ranking* recomendar(const vector<vector<int>> &compras, double** S,
+Ranking* recomendar(const list<vector<int>> &compras, double** S,
                     int nCliente, int nProd, int c, int k, int* qtdRecomendados) {
     // Aloca todas as estruturas dinamicamente com malloc
     int* L = (int*)malloc(nCliente * sizeof(int));

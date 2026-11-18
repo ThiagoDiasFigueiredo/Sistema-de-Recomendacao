@@ -41,11 +41,12 @@ void AtividadeQuatro(const listaCompras &lista,int qnt_produto) {
 }
 
 void AtividadeCinco(const listaCompras &lista, int pos_cliente) {
-    for (int i = 0; i < pos_cliente; i++) {
+    auto it = lista.compras.begin();
+    for (int i = 0; i < pos_cliente && it != lista.compras.end(); i++, ++it) {
         cout << lista.clientes[i] << " comprou:";
-        int tam = lista.compras[i].size();
+        int tam = it->size();
         for (int j = 0; j < tam; j++) {
-            cout << " " << lista.compras[i][j];
+            cout << " " << (*it)[j];
         }
         cout << "\n";
     }
@@ -147,6 +148,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
     }
 
     //Monta o vector compra ATIVIDADE 1.5
+//Monta a list compra ATIVIDADE 1.5
     sort(dados, dados + total, comparaPorCliente); 
     int pos_cliente = -1;
     for (int i = 0; i < total; i++) {
@@ -162,13 +164,13 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
         
         int id_prod = lista.codigo_prod[dados[i].produto];
         bool repetido = false;
-        for (int j = 0; j < (int)lista.compras[pos_cliente].size(); j++) {
-            if (lista.compras[pos_cliente][j] == id_prod) {
+        for (int j = 0; j < (int)lista.compras.back().size(); j++) {
+            if (lista.compras.back()[j] == id_prod) {
                 repetido = true;
             }
         }
         if (!repetido) {
-            lista.compras[pos_cliente].push_back(id_prod);
+            lista.compras.back().push_back(id_prod);
         }
     } 
     

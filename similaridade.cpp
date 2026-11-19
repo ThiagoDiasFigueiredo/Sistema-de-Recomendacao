@@ -46,17 +46,23 @@ int** calcula_intercecao(const list<vector<int>>& lista_compra, int ncliente, in
     return I;
 }
 
-int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int ncliente, int nproduto){
+int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int ncliente, int nproduto) {
     int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
 
-    auto it = lista_compra.begin();
-    for (int i = 0; i < ncliente && it != lista_compra.end(); i++, ++it) {
-        for (int j = 0; j < (int)it->size(); j++) {
-            int id_produto = (*it)[j];
+    int i = 0;
+    for (const vector<int> &produtos_cliente : lista_compra) {
+        if (i >= ncliente) {
+            break;
+        }
+        
+        for (int j = 0; j < produtos_cliente.size(); j++) {
+            int id_produto = produtos_cliente[j];
+            
             if (id_produto >= 0 && id_produto < nproduto) {
                 matrizCompra[i][id_produto] = 1;
             }
         }
+        i++;
     }
 
     int** I = alocarMatrizInt(ncliente, ncliente);
@@ -65,7 +71,7 @@ int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int nc
         for (int j = i; j < ncliente; j++) {
             int soma = 0;
             for (int k = 0; k < nproduto; k++) {
-                soma = soma + matrizCompra[i][k] * matrizCompra[j][k];
+                soma = soma + (matrizCompra[i][k] * matrizCompra[j][k]);
             }
             I[i][j] = soma;
             I[j][i] = soma;

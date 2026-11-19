@@ -131,11 +131,11 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
     
     //EXECUÇÃO DAS ATIVIDADES
 
-    AtividadeUm(lista, qtd_cliente_unico);
+    //AtividadeUm(lista, qtd_cliente_unico); 
     //AtividadeDois(lista, qtd_cliente_unico);
     //AtividadeTres(lista, qtd_repetido_nome);
     //AtividadeQuatro(lista, qtd_repetido_produto);
-    AtividadeCinco(lista, qtd_cliente_unico);   
+    //AtividadeCinco(lista, qtd_cliente_unico);   
     
     printf("\nTotal de registros validos lidos: %d\n", total);
     printf("Total de linhas invalidas: %d\n", lixo);

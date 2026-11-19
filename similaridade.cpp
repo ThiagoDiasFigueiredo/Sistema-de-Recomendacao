@@ -46,6 +46,36 @@ int** calcula_intercecao(const list<vector<int>>& lista_compra, int ncliente, in
     return I;
 }
 
+int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int ncliente, int nproduto){
+    int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
+
+    auto it = lista_compra.begin();
+    for (int i = 0; i < ncliente && it != lista_compra.end(); i++, ++it) {
+        for (int j = 0; j < (int)it->size(); j++) {
+            int id_produto = (*it)[j];
+            if (id_produto >= 0 && id_produto < nproduto) {
+                matrizCompra[i][id_produto] = 1;
+            }
+        }
+    }
+
+    int** I = alocarMatrizInt(ncliente, ncliente);
+
+    for (int i = 0; i < ncliente; i++) {
+        for (int j = i; j < ncliente; j++) {
+            int soma = 0;
+            for (int k = 0; k < nproduto; k++) {
+                soma = soma + matrizCompra[i][k] * matrizCompra[j][k];
+            }
+            I[i][j] = soma;
+            I[j][i] = soma;
+        }
+    }
+
+    liberarMatrizInt(matrizCompra, ncliente);
+    return I;
+}
+
 void calcularJaccard(int** I, const list<vector<int>>& listaCompra, double** S, int nCliente)  {
     auto it = listaCompra.begin();
     for (int i = 0; i < nCliente && it != listaCompra.end(); i++, ++it) {
@@ -95,35 +125,6 @@ int encontrarClienteMaisSimilar(double** S, int ncliente, int cliente_alvo) {
     return mais_similar;
 }
 
-int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int ncliente, int nproduto){
-    int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
-
-    auto it = lista_compra.begin();
-    for (int i = 0; i < ncliente && it != lista_compra.end(); i++, ++it) {
-        for (int j = 0; j < (int)it->size(); j++) {
-            int id_produto = (*it)[j];
-            if (id_produto >= 0 && id_produto < nproduto) {
-                matrizCompra[i][id_produto] = 1;
-            }
-        }
-    }
-
-    int** I = alocarMatrizInt(ncliente, ncliente);
-
-    for (int i = 0; i < ncliente; i++) {
-        for (int j = i; j < ncliente; j++) {
-            int soma = 0;
-            for (int k = 0; k < nproduto; k++) {
-                soma = soma + matrizCompra[i][k] * matrizCompra[j][k];
-            }
-            I[i][j] = soma;
-            I[j][i] = soma;
-        }
-    }
-
-    liberarMatrizInt(matrizCompra, ncliente);
-    return I;
-}
 int similaridade(listaCompras &lista){
     int usuario;
     printf("Digite uma opcao:\n");
@@ -186,7 +187,5 @@ int similaridade(listaCompras &lista){
         liberarMatrizDouble(S, nCliente);
     }
     
-    
-
     return 0;
 }

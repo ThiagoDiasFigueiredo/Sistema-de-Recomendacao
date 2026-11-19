@@ -149,8 +149,8 @@ int recomendacao(listaCompras &lista, int cliente, int k) {
         printf("Nenhum produto para recomendar.\n");
     }
     for (int i = 0; i < qtdRec; i++) {
-        printf("%d) Produto codigo %d (indice %d) - R = %.4f\n",
-               i + 1, lista.codigo_produtos[rec[i].id], rec[i].id, rec[i].valor);
+        printf("%d) Nome do produto: %s (indice %d) - R = %.4f\n",
+               i + 1, lista.nome_produtos[rec[i].id].c_str(), rec[i].id, rec[i].valor);
     }
 
     free(rec);

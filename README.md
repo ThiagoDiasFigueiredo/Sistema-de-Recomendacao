@@ -89,7 +89,7 @@ Requisito: compilador C++ com suporte a C++11 ou superior (por exemplo, `g++`).
 
 ```bash
 g++ -std=c++11 main.cpp leitura.cpp similaridade.cpp recomendacao.cpp alocar_matriz.cpp -o programa
-./programa dados/dados_venda_cluster_4.csv
+./programa dados/dados_venda_cluster_0.csv
 ```
 
 Ao executar, o programa pede a escolha do método de similaridade (`1` = transposta, `2` = somatório) e, em seguida, mostra o cliente mais similar, o tempo gasto e as recomendações.
@@ -137,6 +137,6 @@ Cliente consultado: Indice 840 (Codigo: ...)
 - A matriz de distâncias ocupa memória proporcional a `n²`, o que limita o uso com bases muito grandes. Uma versão com matrizes esparsas ou com apenas os `k` vizinhos mais próximos resolveria isso.
 - Falta uma suíte de testes automatizados.
 
-## Autor
+## Autores
 
-**Seu Nome** — [LinkedIn](https://www.linkedin.com/) · [GitHub](https://github.com/)
+Thiago Dias e Hugo Suassuna

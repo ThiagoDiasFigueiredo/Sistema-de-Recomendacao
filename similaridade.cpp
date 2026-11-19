@@ -1,12 +1,11 @@
 #include "Similaridade.h"
 #include "leitura.h"
 #include "alocar_matriz.h"
+#include "matrizes_esparsas.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <vector>
 #include <ctime>
-#include <thread>
 #include <list>
 using namespace std;
 
@@ -132,23 +131,29 @@ int encontrarClienteMaisSimilar(double** S, int ncliente, int cliente_alvo) {
 }
 
 int similaridade(listaCompras &lista){
+    int nCliente = (int)lista.compras.size();
+    int nProd = (int)lista.codigo_produtos.size();
+    int cliente_alvo =791;
+
+    if (nCliente == 0) {
+        printf("Nenhum cliente carregado.\n");
+        return 1;
+    }
+
     int usuario;
-    printf("Digite uma opcao:\n");
-    printf("[1] Similaridade pela transposta:\n");
-    printf("[2] Similaridade pelo metodo do somatorio:\n");
+    printf("\nDigite uma opcao:\n");
+    printf("[1] Similaridade pela transposta (Densa - Atividade 2)\n");
+    printf("[2] Similaridade pelo metodo do somatorio (Densa - Atividade 4)\n");
+    printf("[3] Similaridade por Matriz Esparsa CSR (Atividade 5)\n");
     scanf("%d",&usuario);
     if(usuario == 1){
 
         clock_t inicio = clock();
-        int nCliente = lista.compras.size();
-        int nProd = lista.codigo_produtos.size();
-
         // Aloca a matriz S e calcula a similaridade
         double** S = alocarMatrizDouble(nCliente, nCliente);
         calcularSimilaridade(lista.compras, S, nCliente, nProd);
 
         // Acha o cliente mais similar ao c
-        int cliente_alvo = 791;
         int mais_similar = encontrarClienteMaisSimilar(S, nCliente, cliente_alvo);
         clock_t fim = clock();
         printf("=== Resultado Etapa 2 (Similaridade) ===\n");
@@ -167,15 +172,12 @@ int similaridade(listaCompras &lista){
     } else if (usuario == 2){
 
         clock_t inicio = clock();
-        int nCliente = lista.compras.size();
-        int nProd = lista.codigo_produtos.size();
 
         // Aloca a matriz S e calcula a similaridade
         double** S = alocarMatrizDouble(nCliente, nCliente);
         calcularSimilaridadeOtimizada(lista.compras, S, nCliente, nProd);
 
         // Acha o cliente mais similar ao c
-        int cliente_alvo = 791;
         int mais_similar = encontrarClienteMaisSimilar(S, nCliente, cliente_alvo);
         clock_t fim = clock();
         printf("\n=== Resultado Etapa 2 (Similaridade) ===\n");
@@ -191,6 +193,27 @@ int similaridade(listaCompras &lista){
         }
 
         liberarMatrizDouble(S, nCliente);
+    }
+
+    else if (usuario == 3) {
+        clock_t inicio = clock();
+        CSRDouble S = calcularSimilaridadeCSR(lista.compras, nCliente, nProd);
+
+        double menor_dist = 1.0;
+        int mais_similar = encontrarClienteMaisSimilarCSR(S, cliente_alvo, &menor_dist);
+        clock_t fim = clock();
+
+        printf("\n=== Resultado Similaridade (Matriz Esparsa CSR) ===\n");
+        if (mais_similar != -1) {
+            printf("Cliente consultado: Indice %d (Codigo: %s)\n",
+                   cliente_alvo, lista.clientes[cliente_alvo].c_str());
+            printf("Cliente mais similar: Indice %d (Codigo: %s)\n",
+                   mais_similar, lista.clientes[mais_similar].c_str());
+            printf("Distancia de Jaccard s(i,j): %.4f\n", menor_dist);
+            double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
+            printf("Tempo em segundos: %.6f\n", tempo);
+        }
+        liberarCSRDouble(&S);
     }
     
     return 0;

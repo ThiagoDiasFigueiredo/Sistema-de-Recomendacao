@@ -1,6 +1,5 @@
 #include "recomendacao.h"
-#include "Similaridade.h"
-#include "alocar_matriz.h"
+#include "matrizes_esparsas.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,22 +12,24 @@ bool comparaPorValor(const Ranking &a, const Ranking &b) {
     return a.id < b.id;
 }
 
-// Atividade 3.1 - Identifica vizinhos usando vetor alocado com malloc
-int indentificarVizinhos(double** S, int numCliente, int c, int* L) {
+// Atividade 3.1 (adaptada para CSR) - Percorre apenas a linha c da matriz esparsa S
+int identificarVizinhosCSR(const CSRDouble& S, int c, int* L, double* distL) {
     int tamL = 0;
-    for (int i = 0; i < numCliente; i++) {
-        if (i != c && S[c][i] < 1) { // Clientes diferentes e distancia menor que 1
-            L[tamL] = i;
+    for (int k = S.linha_index[c]; k < S.linha_index[c + 1]; k++) {
+        int vizinho = S.col_index[k];
+        double dist = S.valores[k];
+        if (vizinho != c && dist < 1.0) {
+            L[tamL] = vizinho;
+            distL[tamL] = dist;
             tamL++;
         }
     }
     return tamL;
 }
 
-// Atividade 3.2 - Inicializa os vetores de ranqueamento alocados com malloc
+// Atividade 3.2 - Inicializa os vetores de ranqueamento
 void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c,
                             double* vetorR, int* marca, int* comprado) {
-    
     for (int i = 0; i < numProd; i++) {
         vetorR[i] = 1.0;   // Cada produto recebe 1
         marca[i] = -1;     // Produto nao atualizado
@@ -42,42 +43,46 @@ void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c
     const int* produtosCliente = it->data();
     for (int i = 0; i < qtdComprada; i++) {
         int prodId = produtosCliente[i];
-        if (prodId >= 0 && prodId <= numProd) {
-            comprado[prodId] = 1; // Marca 1 nos produtos ja comprados pelo cliente c
+        if (prodId >= 0 && prodId < numProd) {
+            comprado[prodId] = 1;
         }
     }
 }
 
-// Atividade 3.3 - Calcula o ranqueamento percorrendo ponteiros alocados com malloc
-void calcularRanqueamento(double* notaProduto, int* ultimoVizinho, const int* clienteComprou,
-                          const list<vector<int>> &compras, double** distancia,
-                          const int* vizinhos, int qtdVizinhos, int cliente, int qtdProdutos) {
+// Atividade 3.3 (adaptada para CSR) - Usa diretamente as distancias extraidas da CSR
+void calcularRanqueamentoCSR(double* notaProduto, int* ultimoVizinho, const int* clienteComprou,
+                             const list<vector<int>> &compras, const int* vizinhos,
+                             const double* distVizinhos, int qtdVizinhos, int qtdProdutos) {
+    auto it = compras.begin();
+    int idxAtual = 0;
 
-    // para cada vizinho do cliente
     for (int posVizinho = 0; posVizinho < qtdVizinhos; posVizinho++) {
         int vizinho = vizinhos[posVizinho];
-        
-        auto it = compras.begin();
-        advance(it, vizinho);
+        double dist = distVizinhos[posVizinho];
+
+        if (vizinho < idxAtual) {
+            it = compras.begin();
+            idxAtual = 0;
+        }
+        advance(it, vizinho - idxAtual);
+        idxAtual = vizinho;
 
         int qtdProdutosVizinho = (int)it->size();
         const int* produtosVizinho = it->data();
 
-        // para cada produto que esse vizinho comprou
         for (int posProduto = 0; posProduto < qtdProdutosVizinho; posProduto++) {
             int produto = produtosVizinho[posProduto];
-
             if (produto >= 0 && produto < qtdProdutos) {
                 if (clienteComprou[produto] == 0 && ultimoVizinho[produto] != vizinho) {
-                    notaProduto[produto] = notaProduto[produto] * distancia[cliente][vizinho];
+                    notaProduto[produto] = notaProduto[produto] * dist;
                     ultimoVizinho[produto] = vizinho;
-                    }   
                 }
             }
         }
     }
+}
 
-// Atividade 3.4 - Ordena candidatos e seleciona os k melhores usando malloc
+// Atividade 3.4 - Ordena candidatos e seleciona os k melhores
 int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado,
                      int nProd, int k, Ranking* resultado) {
     Ranking* candidatos = (Ranking*)malloc(nProd * sizeof(Ranking));
@@ -103,22 +108,27 @@ int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado
     return qtdResultado;
 }
 
-Ranking* recomendar(const list<vector<int>> &compras, double** S,
-                    int nCliente, int nProd, int c, int k, int* qtdRecomendados) {
-    // Aloca todas as estruturas dinamicamente com malloc
-    int* L = (int*)malloc(nCliente * sizeof(int));
-    double* vetorR = (double*)malloc((nProd) * sizeof(double));
-    int* marca = (int*)malloc((nProd) * sizeof(int));
-    int* comprado = (int*)malloc((nProd) * sizeof(int));
+Ranking* recomendarCSR(const list<vector<int>> &compras, const CSRDouble& S,
+                       int nProd, int c, int k, int* qtdRecomendados) {
+    int capVizinhos = S.linha_index[c + 1] - S.linha_index[c];
+    if (capVizinhos <= 0) {
+        capVizinhos = 1;
+    }
+
+    int* L = (int*)malloc(capVizinhos * sizeof(int));
+    double* distL = (double*)malloc(capVizinhos * sizeof(double));
+    double* vetorR = (double*)malloc(nProd * sizeof(double));
+    int* marca = (int*)malloc(nProd * sizeof(int));
+    int* comprado = (int*)malloc(nProd * sizeof(int));
     Ranking* resultado = (Ranking*)malloc(k * sizeof(Ranking));
 
-    int tamL = indentificarVizinhos(S, nCliente, c, L);
+    int tamL = identificarVizinhosCSR(S, c, L, distL);
     inicializaRanqueamento(compras, nProd, c, vetorR, marca, comprado);
-    calcularRanqueamento(vetorR, marca, comprado, compras, S, L, tamL, c, nProd);
+    calcularRanqueamentoCSR(vetorR, marca, comprado, compras, L, distL, tamL, nProd);
     *qtdRecomendados = ordenaEseleciona(vetorR, marca, comprado, nProd, k, resultado);
 
-    // Libera os vetores auxiliares
     free(L);
+    free(distL);
     free(vetorR);
     free(marca);
     free(comprado);
@@ -135,13 +145,13 @@ int recomendacao(listaCompras &lista, int cliente, int k) {
         return 1;
     }
 
-    // Reaproveita as funcoes da etapa 2 e o alocar_matriz.h para calcular S
-    double** S = alocarMatrizDouble(nCliente, nCliente);
-    calcularSimilaridade(lista.compras, S, nCliente, nProd);
+    // Usa a nova representacao de matriz esparsa CSR (Atividade 5)
+    CSRDouble S = calcularSimilaridadeCSR(lista.compras, nCliente, nProd);
 
     int qtdRec = 0;
-    Ranking* rec = recomendar(lista.compras, S, nCliente, nProd, cliente, k, &qtdRec);
+    Ranking* rec = recomendarCSR(lista.compras, S, nProd, cliente, k, &qtdRec);
 
+    printf("\n=== Recomendacoes (via Matriz Esparsa CSR) ===\n");
     printf("Cliente consultado: Indice %d (Codigo: %s)\n",
            cliente, lista.clientes[cliente].c_str());
 
@@ -154,6 +164,6 @@ int recomendacao(listaCompras &lista, int cliente, int k) {
     }
 
     free(rec);
-    liberarMatrizDouble(S, nCliente);
+    liberarCSRDouble(&S);
     return 0;
 }

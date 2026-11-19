@@ -38,4 +38,7 @@ void liberarCSRDouble(CSRDouble* M);
 // Testador da Etapa 5 (compara tempo e memoria: Densa vs CSR)
 int similaridadeCSR(listaCompras &lista);
 
+void calcularSimilaridadeOtimizada(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd);
+int encontrarClienteMaisSimilar(double** S, int ncliente, int cliente_alvo);
+
 #endif

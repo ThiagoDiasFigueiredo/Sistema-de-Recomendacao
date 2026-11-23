@@ -195,26 +195,10 @@ int similaridade(listaCompras &lista){
         liberarMatrizDouble(S, nCliente);
     }
 
-    else if (usuario == 3) {
-        clock_t inicio = clock();
-        CSRDouble S = calcularSimilaridadeCSR(lista.compras, nCliente, nProd);
-
-        double menor_dist = 1.0;
-        int mais_similar = encontrarClienteMaisSimilarCSR(S, cliente_alvo, &menor_dist);
-        clock_t fim = clock();
-
-        printf("\n=== Resultado Similaridade (Matriz Esparsa CSR) ===\n");
-        if (mais_similar != -1) {
-            printf("Cliente consultado: Indice %d (Codigo: %s)\n",
-                   cliente_alvo, lista.clientes[cliente_alvo].c_str());
-            printf("Cliente mais similar: Indice %d (Codigo: %s)\n",
-                   mais_similar, lista.clientes[mais_similar].c_str());
-            printf("Distancia de Jaccard s(i,j): %.4f\n", menor_dist);
-            double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
-            printf("Tempo em segundos: %.6f\n", tempo);
-        }
-        liberarCSRDouble(&S);
+else if (usuario == 3) {
+        similaridadeCSR(lista);
     }
+
     
     return 0;
 }

@@ -16,4 +16,5 @@ void calcularJaccard(int** I, const list<vector<int>>& listaCompra, double** S, 
 void calcularSimilaridade(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd);
 void calcularSimilaridadeOtimizada(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd);
 int similaridade(listaCompras &lista);
+int encontrarClienteMaisSimilar(double** S, int ncliente, int cliente_alvo);
 #endif

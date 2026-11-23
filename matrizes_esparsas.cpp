@@ -219,8 +219,6 @@ int similaridadeCSR(listaCompras &lista) {
     const int LIMITE_CLIENTES_DENSA = 10000;
     bool rodou_densa = false;
     double tempo_densa = 0.0;
-    int mais_similar_densa = -1;
-    double dist_densa = 1.0;
 
     if (nCliente <= LIMITE_CLIENTES_DENSA) {
         clock_t inicio_densa = clock();
@@ -229,11 +227,6 @@ int similaridadeCSR(listaCompras &lista) {
         clock_t fim_densa = clock();
         tempo_densa = (double)(fim_densa - inicio_densa) / CLOCKS_PER_SEC;
         rodou_densa = true;
-
-        mais_similar_densa = encontrarClienteMaisSimilar(S_densa, nCliente, cliente_alvo);
-        if (mais_similar_densa != -1) {
-            dist_densa = S_densa[cliente_alvo][mais_similar_densa];
-        }
 
         liberarMatrizDouble(S_densa, nCliente);
     }
@@ -246,7 +239,7 @@ int similaridadeCSR(listaCompras &lista) {
     clock_t fim_csr = clock();
     double tempo_csr = (double)(fim_csr - inicio_csr) / CLOCKS_PER_SEC;
 
-    // Calculo de Memoria (Bytes -> KB)
+    // Calculo de Memoria
     size_t mem_compra_csr = calcularMemoriaCSRInt(A_csr);
     size_t mem_sim_csr = calcularMemoriaCSRDouble(S_csr);
 
@@ -255,6 +248,15 @@ int similaridadeCSR(listaCompras &lista) {
 
     double menor_dist = 1.0;
     int mais_similar = encontrarClienteMaisSimilarCSR(S_csr, cliente_alvo, &menor_dist);
+
+    printf("\n=== Resultado Similaridade (Matriz Esparsa CSR) ===\n");
+    if (mais_similar != -1) {
+        printf("Cliente consultado: Indice %d (Codigo: %s)\n",
+               cliente_alvo, lista.clientes[cliente_alvo].c_str());
+        printf("Cliente mais similar: Indice %d (Codigo: %s)\n",
+               mais_similar, lista.clientes[mais_similar].c_str());
+        printf("Distancia de Jaccard s(i,j): %.4f\n", menor_dist);
+    }
 
     printf("\n--- Desempenho (CSR vs Densa) ---\n");
     printf("Tempo CSR:   %.6f s\n", tempo_csr);

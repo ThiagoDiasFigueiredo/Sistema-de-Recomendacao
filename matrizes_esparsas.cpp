@@ -210,28 +210,9 @@ void liberarCSRDouble(CSRDouble* M) {
 int similaridadeCSR(listaCompras &lista) {
     int nCliente = (int)lista.compras.size();
     int nProd = (int)lista.codigo_produtos.size();
-
     int cliente_alvo = 791;
-    size_t mem_compra_densa = (size_t)nCliente * (size_t)nProd * sizeof(int);
-    size_t mem_sim_densa = (size_t)nCliente * (size_t)nCliente * sizeof(double);
 
-    // 1. Medicao da abordagem Densa Otimizada (com trava de seguranca)
-    const int LIMITE_CLIENTES_DENSA = 10000;
-    bool rodou_densa = false;
-    double tempo_densa = 0.0;
-
-    if (nCliente <= LIMITE_CLIENTES_DENSA) {
-        clock_t inicio_densa = clock();
-        double** S_densa = alocarMatrizDouble(nCliente, nCliente);
-        calcularSimilaridadeOtimizada(lista.compras, S_densa, nCliente, nProd);
-        clock_t fim_densa = clock();
-        tempo_densa = (double)(fim_densa - inicio_densa) / CLOCKS_PER_SEC;
-        rodou_densa = true;
-
-        liberarMatrizDouble(S_densa, nCliente);
-    }
-
-    // 2. Medicao da abordagem Esparsa (CSR)
+    // Medicao da abordagem Esparsa (CSR)
     clock_t inicio_csr = clock();
     CSRInt A_csr = construirCSRCompras(lista.compras, nCliente, nProd);
     CSRInt I_csr = multiplicarCSRTransposta(A_csr);
@@ -239,7 +220,9 @@ int similaridadeCSR(listaCompras &lista) {
     clock_t fim_csr = clock();
     double tempo_csr = (double)(fim_csr - inicio_csr) / CLOCKS_PER_SEC;
 
-    // Calculo de Memoria
+    // Calculo de economia de memoria (CSR vs Densa)
+    size_t mem_compra_densa = (size_t)nCliente * (size_t)nProd * sizeof(int);
+    size_t mem_sim_densa = (size_t)nCliente * (size_t)nCliente * sizeof(double);
     size_t mem_compra_csr = calcularMemoriaCSRInt(A_csr);
     size_t mem_sim_csr = calcularMemoriaCSRDouble(S_csr);
 
@@ -257,22 +240,10 @@ int similaridadeCSR(listaCompras &lista) {
                mais_similar, lista.clientes[mais_similar].c_str());
         printf("Distancia de Jaccard s(i,j): %.4f\n", menor_dist);
     }
-
-    printf("\n--- Desempenho (CSR vs Densa) ---\n");
-    printf("Tempo CSR:   %.6f s\n", tempo_csr);
-    if (rodou_densa) {
-        printf("Tempo Densa: %.6f s\n", tempo_densa);
-        if (tempo_csr > 0.0) {
-            printf("Ganho de desempenho: %.2fx mais rapido\n", tempo_densa / tempo_csr);
-        }
-    } else {
-        printf("Tempo Densa: nao executado (exigiria %.2f MB de RAM)\n", mem_sim_densa / (1024.0 * 1024.0));
-    }
-
-    printf("\n--- Economia de Memoria (CSR vs Densa) ---\n");
-    printf("Matriz de Compras:      Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
+    printf("Tempo CSR: %.6f s\n", tempo_csr);
+    printf("Memoria Compras:      Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
            mem_compra_densa / 1024.0, mem_compra_csr / 1024.0, econ_compra);
-    printf("Matriz de Similaridade: Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
+    printf("Memoria Similaridade: Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
            mem_sim_densa / 1024.0, mem_sim_csr / 1024.0, econ_sim);
 
     liberarCSRInt(&A_csr);

@@ -14,6 +14,7 @@ bool comparaPorValor(const Ranking &a, const Ranking &b) {
 
 // Atividade 3.1 (adaptada para CSR) - Percorre apenas a linha c da matriz esparsa S
 int identificarVizinhosCSR(const CSRDouble& S, int c, int* L, double* distL) {
+    //seleciona os clientes que tem pelo menos um produto em comum
     int tamL = 0;
     for (int k = S.linha_index[c]; k < S.linha_index[c + 1]; k++) {
         int vizinho = S.col_index[k];

@@ -23,10 +23,10 @@ typedef struct {
 } CSRDouble;
 
 // Funcoes de construcao, multiplicacao A * A^T e similaridade em CSR (Atividade 5)
-CSRInt construirCSRCompras(const list<vector<int>>& lista_compra, int ncliente, int nproduto);
+CSRInt construirCSRCompras(const vector<list<int>>& lista_compra, int ncliente, int nproduto);
 CSRInt multiplicarCSRTransposta(const CSRInt& A);
 CSRDouble calcularJaccardCSR(const CSRInt& I, const CSRInt& A);
-CSRDouble calcularSimilaridadeCSR(const list<vector<int>>& lista_compra, int ncliente, int nproduto);
+CSRDouble calcularSimilaridadeCSR(const vector<list<int>>& lista_compra, int ncliente, int nproduto);
 
 // Funcoes utilitarias de consulta, memoria e liberacao
 int encontrarClienteMaisSimilarCSR(const CSRDouble& S, int cliente_alvo, double* menor_dist);

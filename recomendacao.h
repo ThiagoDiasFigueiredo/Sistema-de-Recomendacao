@@ -12,23 +12,23 @@ typedef struct
 bool comparaPorValor(const Ranking &a, const Ranking &b);
 
 // Atividade 3.1
-int indentificarVizinhos(double** S, int numCliente, int c, int* L);
+int identificarVizinhosCSR(const CSRDouble& S, int c, int* L, double* distL);
 
 // Atividade 3.2
-void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c,
+void inicializaRanqueamento(const vector<list<int>> &compras, int numProd, int c,
                             double* vetorR, int* marca, int* comprado);
 
 // Atividade 3.3
-void calcularRanqueamento(double* vetorR, int* marca, const int* comprado,
-                          const list<vector<int>> &compras, double** S,
-                          const int* L, int tamL, int c, int numProd);
+void calcularRanqueamentoCSR(double* notaProduto, int* ultimoVizinho, const int* clienteComprou,
+                             const vector<list<int>> &compras, const int* vizinhos,
+                             const double* distVizinhos, int qtdVizinhos, int qtdProdutos);
 
 // Atividade 3.4
 int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado,
                      int nProd, int k, Ranking* resultado);
 
-Ranking* recomendar(const list<vector<int>> &compras, double** S,
-                    int nCliente, int nProd, int c, int k, int* qtdRecomendados);
+Ranking* recomendarCSR(const vector<list<int>> &compras, const CSRDouble& S,
+                       int nProd, int c, int k, int* qtdRecomendados);
 
 int recomendacao(listaCompras &lista, int cliente, int k);
 

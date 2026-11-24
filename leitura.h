@@ -19,7 +19,7 @@ typedef struct
     map<int,int> codigo_prod;
     map<string,int> codigo;
     vector<string> clientes;          // código de cada cliente
-    list<vector<int>> compras;
+    vector<list<int>> compras;
     
 }listaCompras;
 
@@ -29,7 +29,7 @@ int leitura(int argc, char *argv[], listaCompras &lista);
 void AtividadeUm(const listaCompras &lista, int qtd_cliente_unico);     // 1.1 clientes unicos
 void AtividadeDois(const listaCompras &lista, int qtd_cliente_unico);   // 1.2 cliente -> indice
 void AtividadeTres(const listaCompras &lista, int qtd_repetido_nome);   // 1.3 nomes dos produtos
-void AtividadeQuatro(const listaCompras &lista);                        // 1.4 codigo do produto -> ID
+void AtividadeQuatro(const listaCompras &lista, int qnt_produto);       // 1.4 codigo do produto -> ID
 void AtividadeCinco(const listaCompras &lista, int qtd_clientes);       // 1.5 produtos por cliente
 
 #endif

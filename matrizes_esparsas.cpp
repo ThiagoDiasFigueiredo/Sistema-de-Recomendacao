@@ -10,15 +10,15 @@
 using namespace std;
 
 // Converte a lista de compras para a Matriz de Compras A no formato CSR
-CSRInt construirCSRCompras(const list<vector<int>>& lista_compra, int ncliente, int nproduto) {
+CSRInt construirCSRCompras(const vector<list<int>>& lista_compra, int ncliente, int nproduto) {
     CSRInt A;
     A.linhas = ncliente;
     A.colunas = nproduto;
 
     //Conta o total de elementos comprados, ou seja, não nulos
     int total_elementos = 0;
-    for (const vector<int>& produtos_cliente : lista_compra) {
-        total_elementos += (int)produtos_cliente.size();
+    for (int i = 0; i < (int)lista_compra.size(); i++) {
+        total_elementos += (int)lista_compra[i].size();
     }
     A.total_elementos = total_elementos;
 
@@ -27,31 +27,16 @@ CSRInt construirCSRCompras(const list<vector<int>>& lista_compra, int ncliente, 
     A.linha_index = (int*)malloc((ncliente + 1) * sizeof(int));
 
     int cont = 0;
-    int i = 0;
-
-    // Preenche os vetores CSR linha por linha
-    for (const vector<int>& produtos_cliente : lista_compra) {//pega a ficha de cada cliente 
-        //para quando processar todos os diferentes clientes
-        if (i >= ncliente) {
-            break;
-        }
-
+// Preenche os vetores CSR linha por linha
+    for (int i = 0; i < ncliente && i < (int)lista_compra.size(); i++) {
         A.linha_index[i] = cont;
-        int tam = (int)produtos_cliente.size();//quantos produtos o cliente comprou
 
-        // Copia os produtos comprados pelo cliente i
-        for (int j = 0; j < tam; j++) {
-            A.col_index[cont + j] = produtos_cliente[j];//indica onde o cliente começa e vai contando a partir disso
+        for (auto it = lista_compra[i].begin(); it != lista_compra[i].end(); ++it) {
+            int prod = *it;
+            A.col_index[cont] = prod;
+            A.valores[cont] = 1;
+            cont++;
         }
-
-        // Ordena os indices de coluna da linha i para permitir a intersecao em CSR
-        sort(A.col_index + cont, A.col_index + cont + tam);
-
-        for (int j = 0; j < tam; j++) {
-            A.valores[cont + j] = 1;
-        }
-        cont += tam;
-        i++;
     }
     A.linha_index[ncliente] = cont;
 
@@ -151,7 +136,7 @@ CSRDouble calcularJaccardCSR(const CSRInt& I, const CSRInt& A) {
     return S;
 }
 
-CSRDouble calcularSimilaridadeCSR(const list<vector<int>>& lista_compra, int ncliente, int nproduto) {
+CSRDouble calcularSimilaridadeCSR(const vector<list<int>>& lista_compra, int ncliente, int nproduto) {
     CSRInt A = construirCSRCompras(lista_compra, ncliente, nproduto);
     CSRInt I = multiplicarCSRTransposta(A);
     CSRDouble S = calcularJaccardCSR(I, A);

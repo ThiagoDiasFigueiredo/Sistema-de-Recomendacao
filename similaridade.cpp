@@ -9,15 +9,14 @@
 #include <list>
 using namespace std;
 
-int** calcula_intercecao(const list<vector<int>>& lista_compra, int ncliente, int nproduto){
+int** calcula_intercecao(const vector<list<int>>& lista_compra, int ncliente, int nproduto){
     int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
     int** transposta = alocarMatrizInt(nproduto, ncliente);
     
     //preenche a matriz de compra de acordo com a lista da etapa 1
-    auto it = lista_compra.begin();
-    for (int i = 0; i < ncliente && it != lista_compra.end(); i++, ++it) {
-        for (int j = 0; j < (int)it->size(); j++) {
-            int id_produto = (*it)[j];
+    for (int i = 0; i < ncliente && i < (int)lista_compra.size(); i++) {
+        for (auto it = lista_compra[i].begin(); it != lista_compra[i].end(); ++it) {
+            int id_produto = *it;
             matrizCompra[i][id_produto] = 1;
         }
     }
@@ -45,23 +44,16 @@ int** calcula_intercecao(const list<vector<int>>& lista_compra, int ncliente, in
     return I;
 }
 
-int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int ncliente, int nproduto) {
+int** calcula_intercecao_otimizada(const vector<list<int>>& lista_compra, int ncliente, int nproduto) {
     int** matrizCompra = alocarMatrizInt(ncliente, nproduto);
 
-    int i = 0;
-    for (const vector<int> &produtos_cliente : lista_compra) {
-        if (i >= ncliente) {
-            break;
-        }
-        
-        for (int j = 0; j < produtos_cliente.size(); j++) {
-            int id_produto = produtos_cliente[j];
-            
+    for (int i = 0; i < ncliente && i < (int)lista_compra.size(); i++) {
+        for (auto it = lista_compra[i].begin(); it != lista_compra[i].end(); ++it) {
+            int id_produto = *it;
             if (id_produto >= 0 && id_produto < nproduto) {
                 matrizCompra[i][id_produto] = 1;
             }
         }
-        i++;
     }
 
     int** I = alocarMatrizInt(ncliente, ncliente);
@@ -81,11 +73,10 @@ int** calcula_intercecao_otimizada(const list<vector<int>>& lista_compra, int nc
     return I;
 }
 
-void calcularJaccard(int** I, const list<vector<int>>& listaCompra, double** S, int nCliente)  {
-    auto it = listaCompra.begin();
-    for (int i = 0; i < nCliente && it != listaCompra.end(); i++, ++it) {
+void calcularJaccard(int** I, const vector<list<int>>& listaCompra, double** S, int nCliente)  {
+    for (int i = 0; i < nCliente && i < (int)listaCompra.size(); i++) {
         // Conta quantos elementos existem na lista do cliente i (vinda da Etapa 1) para achar |P_i|
-        int tamanho_Pi = it->size();
+        int tamanho_Pi = (int)listaCompra[i].size();
         
         // Aplica a fórmula do quadro: S[i][j] = 1 - (I[i][j] / |P_i|)
         for (int j = 0; j < nCliente; j++) {
@@ -99,7 +90,7 @@ void calcularJaccard(int** I, const list<vector<int>>& listaCompra, double** S, 
 }
 
 
-void calcularSimilaridade(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd) {
+void calcularSimilaridade(const vector<list<int>>& listaCompra, double** S, int nCliente, int nProd) {
     int** I = calcula_intercecao(listaCompra, nCliente, nProd);
 
     calcularJaccard(I, listaCompra, S, nCliente);
@@ -107,7 +98,7 @@ void calcularSimilaridade(const list<vector<int>>& listaCompra, double** S, int 
     liberarMatrizInt(I, nCliente);
 }
 
-void calcularSimilaridadeOtimizada(const list<vector<int>>& listaCompra, double** S, int nCliente, int nProd) {
+void calcularSimilaridadeOtimizada(const vector<list<int>>& listaCompra, double** S, int nCliente, int nProd) {
     int** I = calcula_intercecao_otimizada(listaCompra, nCliente, nProd);
 
     calcularJaccard(I, listaCompra, S, nCliente);
@@ -199,6 +190,6 @@ else if (usuario == 3) {
         similaridadeCSR(lista);
     }
 
-    
+
     return 0;
 }

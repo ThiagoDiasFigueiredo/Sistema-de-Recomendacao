@@ -34,12 +34,10 @@ void AtividadeQuatro(const listaCompras &lista,int qnt_produto) {
 }
 
 void AtividadeCinco(const listaCompras &lista, int pos_cliente) {
-    auto it = lista.compras.begin();
-    for (int i = 0; i < pos_cliente && it != lista.compras.end(); i++, ++it) {
+    for (int i = 0; i < pos_cliente && i < (int)lista.compras.size(); i++) {
         cout << lista.clientes[i] << " comprou:";
-        int tam = it->size();
-        for (int j = 0; j < tam; j++) {
-            cout << " " << (*it)[j];
+        for (auto it = lista.compras[i].begin(); it != lista.compras[i].end(); ++it) {
+            cout << " " << *it;
         }
         cout << "\n";
     }
@@ -93,7 +91,7 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
                 lista.codigo[cod_cliente] = qtd_cliente_unico;
                 lista.codigo_clientes.push_back(cod_cliente);
                 lista.clientes.push_back(cod_cliente);
-                lista.compras.push_back(vector<int>());
+                lista.compras.push_back(list<int>());
                 qtd_cliente_unico++;
             }
 
@@ -110,12 +108,9 @@ int leitura(int argc, char *argv[], listaCompras &lista) {
             int pos_cliente = lista.codigo[cod_cliente];
             int id_prod = lista.codigo_prod[produto];
 
-            auto it = lista.compras.begin();
-            advance(it, pos_cliente);
-
             // Usa find para verificar se o cliente já comprou este produto
-            if (find(it->begin(), it->end(), id_prod) == it->end()) {
-                it->push_back(id_prod);
+            if (find(lista.compras[pos_cliente].begin(), lista.compras[pos_cliente].end(), id_prod) == lista.compras[pos_cliente].end()) {
+                lista.compras[pos_cliente].push_back(id_prod);
             }
         } 
         else if (lido == EOF) {

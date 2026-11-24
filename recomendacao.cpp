@@ -29,7 +29,7 @@ int identificarVizinhosCSR(const CSRDouble& S, int c, int* L, double* distL) {
 }
 
 // Atividade 3.2 - Inicializa os vetores de ranqueamento
-void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c,
+void inicializaRanqueamento(const vector<list<int>> &compras, int numProd, int c,
                             double* vetorR, int* marca, int* comprado) {
     for (int i = 0; i < numProd; i++) {
         vetorR[i] = 1.0;   // Cada produto recebe 1
@@ -37,13 +37,8 @@ void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c
         comprado[i] = 0;   // Cliente ainda nao comprou
     }
 
-    auto it = compras.begin();
-    advance(it, c);
-
-    int qtdComprada = (int)it->size();
-    const int* produtosCliente = it->data();
-    for (int i = 0; i < qtdComprada; i++) {
-        int prodId = produtosCliente[i];
+    for (auto it = compras[c].begin(); it != compras[c].end(); ++it) {
+        int prodId = *it;
         if (prodId >= 0 && prodId < numProd) {
             comprado[prodId] = 1;
         }
@@ -52,27 +47,14 @@ void inicializaRanqueamento(const list<vector<int>> &compras, int numProd, int c
 
 // Atividade 3.3 (adaptada para CSR) - Usa diretamente as distancias extraidas da CSR
 void calcularRanqueamentoCSR(double* notaProduto, int* ultimoVizinho, const int* clienteComprou,
-                             const list<vector<int>> &compras, const int* vizinhos,
+                             const vector<list<int>> &compras, const int* vizinhos,
                              const double* distVizinhos, int qtdVizinhos, int qtdProdutos) {
-    auto it = compras.begin();
-    int idxAtual = 0;
-
     for (int posVizinho = 0; posVizinho < qtdVizinhos; posVizinho++) {
         int vizinho = vizinhos[posVizinho];
         double dist = distVizinhos[posVizinho];
 
-        if (vizinho < idxAtual) {
-            it = compras.begin();
-            idxAtual = 0;
-        }
-        advance(it, vizinho - idxAtual);
-        idxAtual = vizinho;
-
-        int qtdProdutosVizinho = (int)it->size();
-        const int* produtosVizinho = it->data();
-
-        for (int posProduto = 0; posProduto < qtdProdutosVizinho; posProduto++) {
-            int produto = produtosVizinho[posProduto];
+        for (auto it = compras[vizinho].begin(); it != compras[vizinho].end(); ++it) {
+            int produto = *it;
             if (produto >= 0 && produto < qtdProdutos) {
                 if (clienteComprou[produto] == 0 && ultimoVizinho[produto] != vizinho) {
                     notaProduto[produto] = notaProduto[produto] * dist;
@@ -109,7 +91,7 @@ int ordenaEseleciona(const double* vetorR, const int* marca, const int* comprado
     return qtdResultado;
 }
 
-Ranking* recomendarCSR(const list<vector<int>> &compras, const CSRDouble& S,
+Ranking* recomendarCSR(const vector<list<int>> &compras, const CSRDouble& S,
                        int nProd, int c, int k, int* qtdRecomendados) {
     int capVizinhos = S.linha_index[c + 1] - S.linha_index[c];
     if (capVizinhos <= 0) {

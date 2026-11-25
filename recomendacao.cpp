@@ -37,8 +37,7 @@ void inicializaRanqueamento(const vector<list<int>> &compras, int numProd, int c
         comprado[i] = 0;   // Cliente ainda nao comprou
     }
 
-    for (auto it = compras[c].begin(); it != compras[c].end(); ++it) {
-        int prodId = *it;
+    for (int prodId : compras[c]) {
         if (prodId >= 0 && prodId < numProd) {
             comprado[prodId] = 1;
         }
@@ -53,8 +52,7 @@ void calcularRanqueamentoCSR(double* notaProduto, int* ultimoVizinho, const int*
         int vizinho = vizinhos[posVizinho];
         double dist = distVizinhos[posVizinho];
 
-        for (auto it = compras[vizinho].begin(); it != compras[vizinho].end(); ++it) {
-            int produto = *it;
+        for (int produto : compras[vizinho]) {
             if (produto >= 0 && produto < qtdProdutos) {
                 if (clienteComprou[produto] == 0 && ultimoVizinho[produto] != vizinho) {
                     notaProduto[produto] = notaProduto[produto] * dist;
@@ -147,6 +145,6 @@ int recomendacao(listaCompras &lista, int cliente, int k) {
     }
 
     free(rec);
-    liberarCSRDouble(&S);
+    
     return 0;
 }

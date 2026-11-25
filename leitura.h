@@ -20,7 +20,7 @@ typedef struct
     map<string,int> codigo;
     vector<string> clientes;          // código de cada cliente
     vector<list<int>> compras;
-    
+        
 }listaCompras;
 
 

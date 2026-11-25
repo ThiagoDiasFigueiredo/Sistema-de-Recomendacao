@@ -1,10 +1,6 @@
 #include "matrizes_esparsas.h"
-#include "Similaridade.h"
-#include "alocar_matriz.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <algorithm>
+#include <cstdio>
 #include <ctime>
 
 using namespace std;
@@ -14,113 +10,104 @@ CSRInt construirCSRCompras(const vector<list<int>>& lista_compra, int ncliente, 
     CSRInt A;
     A.linhas = ncliente;
     A.colunas = nproduto;
-
-    //Conta o total de elementos comprados, ou seja, não nulos
-    int total_elementos = 0;
-    for (int i = 0; i < (int)lista_compra.size(); i++) {
-        total_elementos += (int)lista_compra[i].size();
-    }
-    A.total_elementos = total_elementos;
-
-    A.valores = (int*)malloc(total_elementos * sizeof(int));
-    A.col_index = (int*)malloc(total_elementos * sizeof(int));
-    A.linha_index = (int*)malloc((ncliente + 1) * sizeof(int));
+    A.linha_index.resize(ncliente + 1, 0);
 
     int cont = 0;
-// Preenche os vetores CSR linha por linha
-    for (int i = 0; i < ncliente && i < (int)lista_compra.size(); i++) {
-        A.linha_index[i] = cont;
+    int i = 0;
 
-        for (auto it = lista_compra[i].begin(); it != lista_compra[i].end(); ++it) {
-            int prod = *it;
-            A.col_index[cont] = prod;
-            A.valores[cont] = 1;
-            cont++;
+    // Preenche os vetores CSR linha por linha (sem precisar ordenar)
+    for (const list<int>& produtos_cliente : lista_compra) {
+        if (i >= ncliente) {
+            break;
         }
+
+        A.linha_index[i] = cont;
+        int tam = (int)produtos_cliente.size();
+
+        for (int prod : produtos_cliente) {
+            A.col_index.push_back(prod);
+            A.valores.push_back(1);
+        }
+
+        cont += tam;
+        i++;
     }
     A.linha_index[ncliente] = cont;
+    A.total_elementos = cont;
 
     return A;
 }
 
-// Multiplicacao C = A * A^T diretamente na estrutura CSR
+// Multiplicacao C = A * A^T usando vetor de marcacao (dispensa sort e ponteiros)
 CSRInt multiplicarCSRTransposta(const CSRInt& A) {
     int n = A.linhas;
     CSRInt C;
     C.linhas = n;
     C.colunas = n;
-    C.linha_index = (int*)malloc((n + 1) * sizeof(int));
+    C.linha_index.resize(n + 1, 0);
 
-    // Capacidade dinamica inicial para armazenar apenas elementos com soma > 0
-    int capacidade = A.total_elementos * 4;
-    C.valores = (int*)malloc(capacidade * sizeof(int));
-    C.col_index = (int*)malloc(capacidade * sizeof(int));
-
+    // Vetor auxiliar para marcar os produtos comprados pelo cliente i
+    vector<int> marcado(A.colunas, 0);
     int cont = 0;
-    C.linha_index[0] = 0;
 
-    //olha onde começam e onde terminam os produtos comprados pelo cliente que vamos comparar e pelo cliente comparado
     for (int i = 0; i < n; i++) {
         int inicio_i = A.linha_index[i];
         int fim_i = A.linha_index[i + 1];
 
-        for (int j = 0; j < n; j++) {
-            int p1 = inicio_i;
-            int p2 = A.linha_index[j];
-            int fim_j = A.linha_index[j + 1];
+        // 1. Marca os produtos do cliente i
+        for (int k = inicio_i; k < fim_i; k++) {
+            int prod = A.col_index[k];
+            marcado[prod] = A.valores[k]; // Guarda 1
+        }
 
+        // 2. Compara com todos os outros clientes j
+        for (int j = 0; j < n; j++) {
+            int inicio_j = A.linha_index[j];
+            int fim_j = A.linha_index[j + 1];
             int soma = 0;
 
-            // Produto interno entre a linha i e a linha j usando os ponteiros CSR
-            while (p1 < fim_i && p2 < fim_j) {
-                if (A.col_index[p1] < A.col_index[p2]) {
-                    p1++;
-                } else if (A.col_index[p1] > A.col_index[p2]) {
-                    p2++;
-                } else {
-                    soma += A.valores[p1] * A.valores[p2];
-                    p1++;
-                    p2++;
+            for (int k = inicio_j; k < fim_j; k++) {
+                int prod = A.col_index[k];
+                if (marcado[prod] > 0) {
+                    soma += marcado[prod] * A.valores[k];
                 }
             }
 
-            // Adiciona na estrutura CSR da matriz C apenas se houver intersecao (soma > 0)
+            // Adiciona na estrutura CSR da matriz C apenas se houver intersecao
             if (soma > 0) {
-                if (cont >= capacidade) {
-                    capacidade *= 2;
-                    C.valores = (int*)realloc(C.valores, capacidade * sizeof(int));
-                    C.col_index = (int*)realloc(C.col_index, capacidade * sizeof(int));
-                }
-                C.valores[cont] = soma;
-                C.col_index[cont] = j;
+                C.valores.push_back(soma);
+                C.col_index.push_back(j);
                 cont++;
             }
         }
+
+        // 3. Limpa as marcacoes do cliente i para a proxima iteracao
+        for (int k = inicio_i; k < fim_i; k++) {
+            int prod = A.col_index[k];
+            marcado[prod] = 0;
+        }
+
         C.linha_index[i + 1] = cont;
     }
 
     C.total_elementos = cont;
-    C.valores = (int*)realloc(C.valores, cont * sizeof(int));
-    C.col_index = (int*)realloc(C.col_index, cont * sizeof(int));
-
     return C;
 }
 
-// Calcula a matriz de similaridade S em formato CSR a partir de I (em CSR) e A (em CSR)
+// Calcula a matriz de similaridade S em formato CSR a partir de I e A
 CSRDouble calcularJaccardCSR(const CSRInt& I, const CSRInt& A) {
     CSRDouble S;
     S.linhas = I.linhas;
     S.colunas = I.colunas;
     S.total_elementos = I.total_elementos;
 
-
-    S.valores = (double*)malloc(S.total_elementos * sizeof(double));
-    S.col_index = (int*)malloc(S.total_elementos * sizeof(int));
-    S.linha_index = (int*)malloc((S.linhas + 1) * sizeof(int));
+    S.valores.resize(S.total_elementos);
+    S.col_index.resize(S.total_elementos);
+    S.linha_index.resize(S.linhas + 1);
 
     for (int i = 0; i < S.linhas; i++) {
         S.linha_index[i] = I.linha_index[i];
-        int tamanho_Pi = A.linha_index[i + 1] - A.linha_index[i]; // Onde termina - começo
+        int tamanho_Pi = A.linha_index[i + 1] - A.linha_index[i];
 
         for (int k = I.linha_index[i]; k < I.linha_index[i + 1]; k++) {
             S.col_index[k] = I.col_index[k];
@@ -141,17 +128,14 @@ CSRDouble calcularSimilaridadeCSR(const vector<list<int>>& lista_compra, int ncl
     CSRInt I = multiplicarCSRTransposta(A);
     CSRDouble S = calcularJaccardCSR(I, A);
 
-    liberarCSRInt(&A);
-    liberarCSRInt(&I);
-
+    // Nao precisa de funcoes liberarCSR: o std::vector libera a memoria sozinho ao sair da funcao
     return S;
 }
 
-int encontrarClienteMaisSimilarCSR(const CSRDouble& S, int cliente_alvo, double* menor_dist) {
+int encontrarClienteMaisSimilarCSR(const CSRDouble& S, int cliente_alvo, double& menor_dist) {
     int mais_similar = -1;
     double menor = 2.0;
 
-    //percorre o S um por vez para descobrir qual o mais similar
     for (int k = S.linha_index[cliente_alvo]; k < S.linha_index[cliente_alvo + 1]; k++) {
         int j = S.col_index[k];
         if (j != cliente_alvo && S.valores[k] < menor) {
@@ -159,45 +143,24 @@ int encontrarClienteMaisSimilarCSR(const CSRDouble& S, int cliente_alvo, double*
             mais_similar = j;
         }
     }
-    if (menor_dist != NULL) {
-        *menor_dist = menor;
-    }
+    menor_dist = menor;
     return mais_similar;
 }
 
 size_t calcularMemoriaCSRInt(const CSRInt& M) {
-    return (M.total_elementos * sizeof(int)) + (M.total_elementos * sizeof(int)) + ((M.linhas + 1) * sizeof(int));
+    return (M.valores.size() * sizeof(int)) + (M.col_index.size() * sizeof(int)) + (M.linha_index.size() * sizeof(int));
 }
 
 size_t calcularMemoriaCSRDouble(const CSRDouble& M) {
-    return (M.total_elementos * sizeof(double)) + (M.total_elementos * sizeof(int)) + ((M.linhas + 1) * sizeof(int));
+    return (M.valores.size() * sizeof(double)) + (M.col_index.size() * sizeof(int)) + (M.linha_index.size() * sizeof(int));
 }
 
-void liberarCSRInt(CSRInt* M) {
-    free(M->valores);
-    free(M->col_index);
-    free(M->linha_index);
-    M->valores = NULL;
-    M->col_index = NULL;
-    M->linha_index = NULL;
-}
-
-void liberarCSRDouble(CSRDouble* M) {
-    free(M->valores);
-    free(M->col_index);
-    free(M->linha_index);
-    M->valores = NULL;
-    M->col_index = NULL;
-    M->linha_index = NULL;
-}
-
-// Testador exigido nos Entregaveis da Atividade 5 (Desempenho + Economia de Memoria)
+// Testador exigido nos Entregaveis da Atividade 5
 int similaridadeCSR(listaCompras &lista) {
     int nCliente = (int)lista.compras.size();
     int nProd = (int)lista.codigo_produtos.size();
     int cliente_alvo = 791;
 
-    // Medicao da abordagem Esparsa (CSR)
     clock_t inicio_csr = clock();
     CSRInt A_csr = construirCSRCompras(lista.compras, nCliente, nProd);
     CSRInt I_csr = multiplicarCSRTransposta(A_csr);
@@ -205,17 +168,16 @@ int similaridadeCSR(listaCompras &lista) {
     clock_t fim_csr = clock();
     double tempo_csr = (double)(fim_csr - inicio_csr) / CLOCKS_PER_SEC;
 
-    // Calculo de economia de memoria (CSR vs Densa)
     size_t mem_compra_densa = (size_t)nCliente * (size_t)nProd * sizeof(int);
     size_t mem_sim_densa = (size_t)nCliente * (size_t)nCliente * sizeof(double);
     size_t mem_compra_csr = calcularMemoriaCSRInt(A_csr);
     size_t mem_sim_csr = calcularMemoriaCSRDouble(S_csr);
 
-    double econ_compra = (1.0 - ((double)mem_compra_csr / (double)mem_compra_densa)) * 100.0;
-    double econ_sim = (1.0 - ((double)mem_sim_csr / (double)mem_sim_densa)) * 100.0;
+    double econ_compra = 100 - ((double(mem_compra_csr) * 100) /(double)mem_compra_densa);
+    double econ_sim = 100 - (((double)mem_sim_csr) * 100 / (double)mem_sim_densa);
 
     double menor_dist = 1.0;
-    int mais_similar = encontrarClienteMaisSimilarCSR(S_csr, cliente_alvo, &menor_dist);
+    int mais_similar = encontrarClienteMaisSimilarCSR(S_csr, cliente_alvo, menor_dist);
 
     printf("\n=== Resultado Similaridade (Matriz Esparsa CSR) ===\n");
     if (mais_similar != -1) {
@@ -230,10 +192,6 @@ int similaridadeCSR(listaCompras &lista) {
            mem_compra_densa / 1024.0, mem_compra_csr / 1024.0, econ_compra);
     printf("Memoria Similaridade: Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
            mem_sim_densa / 1024.0, mem_sim_csr / 1024.0, econ_sim);
-
-    liberarCSRInt(&A_csr);
-    liberarCSRInt(&I_csr);
-    liberarCSRDouble(&S_csr);
 
     return 0;
 }

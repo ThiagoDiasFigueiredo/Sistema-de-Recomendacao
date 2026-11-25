@@ -2,6 +2,7 @@
 #define RECOMENDACAO_H
 
 #include "leitura.h"
+#include "matrizes_esparsas.h"
 
 typedef struct
 {

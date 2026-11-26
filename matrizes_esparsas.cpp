@@ -174,8 +174,7 @@ int similaridadeCSR(listaCompras &lista) {
     size_t mem_sim_csr = calcularMemoriaCSRDouble(S_csr);
 
     double econ_compra = 100 - ((double(mem_compra_csr) * 100) /(double)mem_compra_densa);
-    double econ_sim = 100 - (((double)mem_sim_csr) * 100 / (double)mem_sim_densa);
-
+   
     double menor_dist = 1.0;
     int mais_similar = encontrarClienteMaisSimilarCSR(S_csr, cliente_alvo, menor_dist);
 
@@ -190,8 +189,7 @@ int similaridadeCSR(listaCompras &lista) {
     printf("Tempo CSR: %.6f s\n", tempo_csr);
     printf("Memoria Compras:      Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
            mem_compra_densa / 1024.0, mem_compra_csr / 1024.0, econ_compra);
-    printf("Memoria Similaridade: Densa = %.2f KB | CSR = %.2f KB | Economia = %.2f%%\n",
-           mem_sim_densa / 1024.0, mem_sim_csr / 1024.0, econ_sim);
+    
 
     return 0;
 }

@@ -69,7 +69,7 @@ CSRInt multiplicarCSRTransposta(const CSRInt& A) {
             for (int k = inicio_j; k < fim_j; k++) {
                 int prod = A.col_index[k];
                 if (marcado[prod] > 0) {
-                    soma += marcado[prod] * A.valores[k];
+                    soma += marcado[prod] * A.valores[k]; //Se os clientes compraram, soma
                 }
             }
 
